@@ -9,12 +9,12 @@ export class AppComponent implements AfterViewInit {
   tileSize: number = 8;
 
   viewPortWidth: number = 5 * this.tileSize;
-  viewPortHeight: number = 5 * this.tileSize;
+  viewPortHeight: number = 3 * this.tileSize;
   viewPortDistance: number = 8 * this.tileSize;
   maxVisibleDistance: number = this.viewPortDistance + 25 * this.tileSize;
 
-  canvasWidth: number = 600;
-  canvasHeight: number = 480;
+  canvasWidth: number;
+  canvasHeight: number;
 
   @ViewChild('canvas') canvas: ElementRef;
 
@@ -22,6 +22,22 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
+    const windowWidth = window.innerWidth - 30;
+    const windowHeight = window.innerHeight - 30;
+    const windowAspectRatio = windowWidth / windowHeight;
+    console.log('windowWidth: ' + windowWidth);
+    console.log('windowHeight: ' + windowHeight);
+    console.log('windowAspectRatio: ' + windowAspectRatio);
+    const viewPortAspectRatio = this.viewPortWidth / this.viewPortHeight;
+    console.log('viewPortAspectRatio: ' + viewPortAspectRatio);
+    if(windowAspectRatio > viewPortAspectRatio) {
+      this.canvasWidth = windowHeight * viewPortAspectRatio;
+      this.canvasHeight = windowHeight;
+    }
+    else {
+      this.canvasWidth = windowWidth;
+      this.canvasHeight = windowWidth / viewPortAspectRatio;
+    }
     canvasElement.width = this.canvasWidth;
     canvasElement.height = this.canvasHeight;
     this.renderContext = canvasElement.getContext('2d');
@@ -45,12 +61,21 @@ export class AppComponent implements AfterViewInit {
   turnLeft(): void {
     console.log('turn left pressed');
   }
+
+  targetLeft(): void {
+    console.log('target left pressed');
+  }
+
   turnRight(): void {
     console.log('turn right pressed');
   }
 
+  targetRight(): void {
+    console.log('target right pressed');
+  }
+
   renderTest():void {
-    setInterval(this.renderFrame(), 1000);
+    this.renderFrame();
   }
 
   renderFrame(): void {

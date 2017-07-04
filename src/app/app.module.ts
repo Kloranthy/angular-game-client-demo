@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { RenderModule } from './render/render.module';
+import { ControlModule } from './control/control.module';
 
 @NgModule({
   declarations: [
@@ -10,7 +11,8 @@ import { RenderModule } from './render/render.module';
   ],
   imports: [
     BrowserModule,
-    RenderModule
+    RenderModule,
+    ControlModule
   ],
   providers: [],
   bootstrap: [AppComponent]

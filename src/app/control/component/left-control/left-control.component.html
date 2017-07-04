@@ -1,0 +1,31 @@
+<div class="left-control-container">
+  <div class="top-control-container">
+    <button (click)="turnLeft()">
+      turn
+    </button>
+    <button (click)="targetLeft()">
+      target
+    </button>
+  </div>
+
+  <div class="bottom-control-container">
+      <button class="movement-control"
+        (click)="moveForward()">
+        forward
+      </button>
+    <div class="spread">
+      <button class="movement-control"
+        (click)="moveLeft()">
+        left
+      </button>
+      <button class="movement-control"
+        (click)="moveRight()">
+        right
+      </button>
+    </div>
+      <button class="movement-control"
+        (click)="moveBackward()">
+        back
+      </button>
+  </div>
+</div>
