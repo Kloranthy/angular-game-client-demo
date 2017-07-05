@@ -4,56 +4,10 @@
     <canvas #canvas></canvas>
   </div>
 
-  <div id="left-control-container"
-    class="left-control-container">
-    <div class="top-control-container">
-      <button (click)="turnLeft()">
-        turn
-      </button>
-      <button (click)="targetLeft()">
-        target
-      </button>
-    </div>
+  <left-control (onControlPressed)="onControlPressed($event)">
+  </left-control>
 
-    <div class="bottom-control-container">
-        <button class="movement-control"
-          (click)="moveForward()">
-          forward
-        </button>
-      <div class="spread">
-        <button class="movement-control"
-          (click)="moveLeft()">
-          left
-        </button>
-        <button class="movement-control"
-          (click)="moveRight()">
-          right
-        </button>
-      </div>
-        <button class="movement-control"
-          (click)="moveBackward()">
-          back
-        </button>
-    </div>
-  </div>
-
-  <div id="right-control-container"
-    class="right-control-container">
-    <div class="top-control-container">
-      <button (click)="turnRight()">
-        turn
-      </button>
-      <button (click)="targetRight()">
-        target
-      </button>
-    </div>
-
-    <div class="bottom-control-container">
-      <button
-        (click)="renderTest()">
-        Render Test
-      </button>
-    </div>
-  </div>
+  <right-control (onControlPressed)="onControlPressed($event)">
+  </right-control>
 
 </div>

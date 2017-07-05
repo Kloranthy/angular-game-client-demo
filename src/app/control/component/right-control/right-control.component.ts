@@ -6,26 +6,44 @@ import { Component, EventEmitter, Output } from '@angular/core';
   styleUrls: ['./right-control.component.css']
 })
 export class RightControlComponent {
-  @Output() onControlPressed; // todo have controls emit events to parent
+  @Output() onControlPressed;
+  width: number;
+  height: number;
+  order: number;
 
   constructor() {
+    this.width = 80;
+    this.height = 400;
     this.onControlPressed = new EventEmitter<string>();
+  }
+
+  resize(
+    width: number,
+    height: number
+  ): void {
+    if(width <= 0) {
+      return;
+    }
+    if(height <= 0) {
+      return;
+    }
+    this.width = width;
+    this.height = height;
   }
 
   turnRight(): void {
     console.log('turn right pressed');
-    this.onControlPressed.emit('turn right pressed');
+    this.onControlPressed.emit('turn right');
   }
 
   targetRight(): void {
     console.log('target right pressed');
-    this.onControlPressed.emit('target right pressed');
+    this.onControlPressed.emit('target right');
   }
 
   renderTest():void {
-    //this.renderFrame();
-      console.log('render test pressed');
-    this.onControlPressed.emit('render test pressed');
+    console.log('render test pressed');
+    this.onControlPressed.emit('render test');
   }
 
 }

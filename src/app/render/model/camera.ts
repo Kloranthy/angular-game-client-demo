@@ -1,40 +1,20 @@
 import { Coordinates } from './coordinates';
 
 export class Camera {
-  coordinates: Coordinates;
-  direction: number;
-  fieldOfView: number;
-  viewPortWidth: number;
-  viewPortHeight: number;
-  focalLength: number;
-  maxDrawDistance: number;
+  tileSize: number = 8;
+
+  horizontalFieldOfView: number = 90;
+  verticalFieldOfView: number = 59;
+
+  viewPortWidth: number = 5 * this.tileSize;
+  viewPortHeight: number = 3 * this.tileSize;
+
+  viewPortDistance: number = 8 * this.tileSize; // todo have this calculated by fov and viewPortWidth
+  maxVisibleDistance: number = this.viewPortDistance + 25 * this.tileSize;
+
+  // todo add resolution (number of rays to send out per degree)
 
   constructor() {
-    this.coordinates = new Coordinates;
-  }
-
-  turn(degrees: number): void {
-    this.direction = this.direction + degrees;
-    if(this.direction > 360) {
-      while(this.direction > 360) {
-        this.direction = this.direction - 360;
-      }
-    }
-    else if(this.direction < 0) {
-      while(this.direction < 0) {
-        this.direction = this.direction + 360;
-      }
-    }
-  }
-
-  move(
-    dx: number,
-    dy: number,
-    dz: number
-  ): void {
-    this.coordinates.x = this.coordinates.x + dx;
-    this.coordinates.y = this.coordinates.y + dy;
-    this.coordinates.z = this.coordinates.z + dz;
   }
 
   render(): void {}

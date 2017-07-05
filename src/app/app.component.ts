@@ -1,4 +1,11 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import {
+  Component, ElementRef, AfterViewInit, ViewChild
+} from '@angular/core';
+
+import { LeftControlComponent } from './control/component/left-control/left-control.component';
+import { RightControlComponent } from './control/component/right-control/right-control.component';
+
+import { InputProcessorService } from './control/service/input-processor.service';
 
 @Component({
   selector: 'app-root',
@@ -6,19 +13,42 @@ import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-  tileSize: number = 8;
+  tileSize: number; // the size of a tile (resolution?)
 
-  viewPortWidth: number = 5 * this.tileSize;
-  viewPortHeight: number = 3 * this.tileSize;
-  viewPortDistance: number = 8 * this.tileSize;
-  maxVisibleDistance: number = this.viewPortDistance + 25 * this.tileSize;
+  viewPortWidth: number; // the width of the view port
+  viewPortHeight: number; // the height of the view port
+  viewPortDistance: number; // the distance from the camera to the view port (focal length)
+  maxVisibleDistance: number; // the maximum visible distance
 
-  canvasWidth: number;
-  canvasHeight: number;
+  minControlWidth: number; // the minimum width of the control containers
+  controlWidth: number;
+  controlHeight: number;
 
+  canvasWidth: number; // the width of the canvas
+  canvasHeight: number; // the height of the canvas
+
+  @ViewChild(LeftControlComponent)
+  leftControl: LeftControlComponent;
+
+  @ViewChild(RightControlComponent)
+  rightControl: RightControlComponent;
   @ViewChild('canvas') canvas: ElementRef;
 
   renderContext: CanvasRenderingContext2D;
+
+  constructor(
+    private inputProcessor: InputProcessorService
+  ) {
+    this.tileSize = 8;
+
+    this.viewPortWidth = 5 * this.tileSize;
+    this.viewPortHeight = 3 * this.tileSize;
+    // todo have view port distance set based on fov and view port dimensions
+    this.viewPortDistance = 8 * this.tileSize;
+    this.maxVisibleDistance = this.viewPortDistance + 25 * this.tileSize;
+
+    this.minControlWidth = 80;
+  }
 
   ngAfterViewInit(): void {
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
@@ -27,54 +57,69 @@ export class AppComponent implements AfterViewInit {
     const windowAspectRatio = windowWidth / windowHeight;
     console.log('windowWidth: ' + windowWidth);
     console.log('windowHeight: ' + windowHeight);
-    console.log('windowAspectRatio: ' + windowAspectRatio);
+    //console.log('windowAspectRatio: ' + windowAspectRatio);
+
     const viewPortAspectRatio = this.viewPortWidth / this.viewPortHeight;
-    console.log('viewPortAspectRatio: ' + viewPortAspectRatio);
-    if(windowAspectRatio > viewPortAspectRatio) {
-      this.canvasWidth = windowHeight * viewPortAspectRatio;
-      this.canvasHeight = windowHeight;
+    //console.log('viewPortAspectRatio: ' + viewPortAspectRatio);
+
+    if(windowAspectRatio > 1) {
+      console.log('landscape mode');
+      const remainingWidth = 0.8 * windowWidth;
+      console.log('removing 20% of window width for controls');
+      // deciding whether to use window height or remaining width is the limiting factor
+      if(remainingWidth / windowHeight > viewPortAspectRatio) {
+        console.log('using window height');
+      }
+      else {
+        console.log('using window width');
+        this.canvasWidth = remainingWidth;
+        this.canvasHeight = this.canvasWidth / viewPortAspectRatio;
+      }
+      this.controlWidth = 0.1 * windowWidth;
+      this.controlHeight = windowHeight;
     }
     else {
+      console.log('portrait mode');
       this.canvasWidth = windowWidth;
       this.canvasHeight = windowWidth / viewPortAspectRatio;
+      this.controlWidth = windowWidth / 2;
+      this.controlHeight = windowHeight - this.canvasHeight;
     }
     canvasElement.width = this.canvasWidth;
     canvasElement.height = this.canvasHeight;
     this.renderContext = canvasElement.getContext('2d');
     console.log('canvasWidth: ' + this.canvasWidth);
     console.log('canvasHeight: ' + this.canvasHeight);
+
+    console.log('controlWidth: ' + this.controlWidth);
+    console.log('controlHeight: ' + this.controlHeight);
+    setTimeout(
+      () => this.leftControl.resize(
+        this.controlWidth,
+        this.controlHeight
+      ),
+      0
+    );
+    setTimeout(
+      () => this.rightControl.resize(
+        this.controlWidth,
+        this.controlHeight
+      ),
+      0
+    );
   }
 
-  moveForward(): void {
-    console.log('move forward pressed');
-  }
-  moveLeft(): void {
-    console.log('move left pressed');
-  }
-  moveRight(): void {
-    console.log('move right pressed');
-  }
-  moveBackward(): void {
-    console.log('move back pressed');
-  }
-
-  turnLeft(): void {
-    console.log('turn left pressed');
-  }
-
-  targetLeft(): void {
-    console.log('target left pressed');
-  }
-
-  turnRight(): void {
-    console.log('turn right pressed');
-  }
-
-  targetRight(): void {
-    console.log('target right pressed');
+  onControlPressed(input: string): void {
+    if(input === 'render test') {
+      this.renderTest();
+    }
+    else {
+      this.inputProcessor.process(input);
+    }
   }
 
   renderTest():void {
+    console.log('render test processed');
     this.renderFrame();
   }
 
