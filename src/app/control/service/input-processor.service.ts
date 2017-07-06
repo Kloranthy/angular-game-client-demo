@@ -3,9 +3,13 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class InputProcessorService {
 
-  constructor() { }
+  constructor() {
+    console.log('InputProcessorService enter constructor');
+    console.log('InputProcessorService exit constructor');
+  }
 
   process(input: string): void {
+    console.log('InputProcessorService enter process');
     console.log(input);
     switch(input) {
       case 'move forward' :
@@ -36,6 +40,7 @@ export class InputProcessorService {
         //this.renderTest();
         break;
     }
+    console.log('InputProcessorService exit process');
   }
 
   moveForward(): void {

@@ -4,21 +4,21 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-around;
+  background-color: #000;
 }
 
-.canvas-container {
-  display: flex;
-  align-items: center;
+app-canvas {
+  background-color: #00ff00;
   order: 1;
 }
 
 left-control {
-  flex-grow: 1;
+  background-color: #ff0000;
   order: 2;
 }
 
 right-control {
-  flex-grow: 1;
+  background-color: #ff0000;
   order: 3;
 }
 
@@ -27,7 +27,7 @@ right-control {
     order: 1;
   }
 
-  .canvas-container {
+  app-canvas {
     order: 2;
   }
 }

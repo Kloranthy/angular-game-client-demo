@@ -13,23 +13,27 @@ export class LeftControlComponent {
   height: number;
 
   constructor() {
-    this.width = 80;
-    this.height = 400;
+    console.log('LeftControlComponent enter constructor');
     this.onControlPressed = new EventEmitter<string>();
+    console.log('LeftControlComponent exit constructor');
   }
 
   resize(
     width: number,
     height: number
   ): void {
+    console.log('LeftControlComponent enter resize');
     if(width <= 0) {
+      console.log('error: width must be positive');
       return;
     }
     if(height <= 0) {
+      console.log('error: height must be positive');
       return;
     }
     this.width = width;
     this.height = height;
+    console.log('LeftControlComponent left-control exit resize');
   }
 
   turnLeft(): void {

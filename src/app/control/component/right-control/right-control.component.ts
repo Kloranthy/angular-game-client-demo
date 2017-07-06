@@ -12,8 +12,6 @@ export class RightControlComponent {
   order: number;
 
   constructor() {
-    this.width = 80;
-    this.height = 400;
     this.onControlPressed = new EventEmitter<string>();
   }
 
@@ -21,14 +19,18 @@ export class RightControlComponent {
     width: number,
     height: number
   ): void {
+    console.log('RightControlComponent enter resize');
     if(width <= 0) {
+      console.log('error: width must be positive');
       return;
     }
     if(height <= 0) {
+      console.log('error: height must be positive');
       return;
     }
     this.width = width;
     this.height = height;
+    console.log('RightControlComponent exit resize');
   }
 
   turnRight(): void {

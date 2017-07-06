@@ -11,58 +11,94 @@ import { Camera } from '../../model/camera';
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements AfterViewInit {
-  order: number;
+  viewPortAspectRatio: number; // the width of the view port
 
   canvasWidth: number; // the width of the canvas
   canvasHeight: number; // the height of the canvas
 
   @ViewChild('canvas') canvas: ElementRef;
+
   renderContext: CanvasRenderingContext2D;
 
   constructor() {
-    this.order = 2;
-
-    this.canvasWidth = 400;
-    this.canvasHeight = 300;
+    console.log('CanvasComponent enter constructor');
+    console.log('CanvasComponent exit constructor');
   }
 
   ngAfterViewInit(): void {
-    console.log('enter ngAfterViewInit');
+    console.log('CanvasComponent enter ngAfterViewInit');
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
-    canvasElement.width = this.canvasWidth;
-    canvasElement.height = this.canvasHeight;
     this.renderContext = canvasElement.getContext('2d');
-    console.log('exit ngAfterViewInit');
+    console.log('CanvasComponent exit ngAfterViewInit');
   }
 
 
-  resizeCanvas(
-    canvasWidth: number,
-    canvasHeight: number
+  resize(
+    width: number,
+    height: number
   ): void {
-    console.log('enter resizeCanvas');
-    console.log('canvasWidth: ' + canvasWidth);
-    console.log('canvasHeight: ' + canvasHeight);
-    if(canvasWidth <= 0) {
+    console.log('CanvasComponent enter resize');
+    console.log('width: ' + width);
+    console.log('height: ' + height);
+    if(width <= 0) {
       console.log('error: canvas width must be positive');
       return;
     }
-    else if(canvasHeight <= 0) {
+    else if(height <= 0) {
       console.log('error: canvas height must be positive');
       return;
     }
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
+    if(this.viewPortAspectRatio) {
+      console.log('making canvas conform to view port aspect ratio');
+      if(width / height > this.viewPortAspectRatio) {
+        console.log('values wider than view port aspect ratio');
+        console.log('using height multiplied by view port aspect ratio for canvas width');
+        this.canvasWidth = height * this.viewPortAspectRatio;
+        this.canvasHeight = height;
+      }
+      else {
+        console.log('values taller than view port aspect ratio');
+        console.log('using width divided by view port aspect ratio for canvas height');
+        this.canvasWidth = width;
+        this.canvasHeight = width / this.viewPortAspectRatio;
+      }
+    }
+    else {
+      console.log('error: viewPortAspectRatio undefined');
+      console.log('using values without adjustment');
+      this.canvasWidth = width;
+      this.canvasHeight = height;
+    }
+
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
     canvasElement.width = this.canvasWidth;
     canvasElement.height = this.canvasHeight;
     console.log('canvas resized');
-    console.log('exit resizeCanvas');
+    console.log('CanvasComponent exit resizeCanvas');
   }
 
-  renderFrame(): void {
-    console.log('enter renderFrame');
-    // todo have CanvasComponent copy the renderedFrame to its canvas
-    console.log('exit renderFrame');
+  drawFrame(canvas: HTMLCanvasElement): void {
+    console.log('CanvasComponent enter renderFrame');
+    // is clearing the frame necessary?
+    this.clearFrame();
+    this.renderContext.drawImage(
+      canvas,
+      0,
+      0,
+      this.canvasWidth,
+      this.canvasHeight
+    );
+    console.log('CanvasComponent exit renderFrame');
+  }
+
+
+  private clearFrame(): void {
+    console.log('CanvasComponent enter clearFrame');
+    this.renderContext.fillStyle = '#000000';
+    this.renderContext.fillRect(
+      0, 0,
+      this.canvasWidth, this.canvasHeight
+    );
+    console.log('CanvasComponent exit clearFrame');
   }
 }
