@@ -79,7 +79,8 @@ export class Camera {
     else {
       this.horizontalFieldOfView = horizontalFieldOfView;
       // todo recalculate other values affected by change in horizontal field of view
-      this.viewPortDistance = this.viewPortWidth / Math.tan(this.horizontalFieldOfView);
+      this.viewPortDistance = this.viewPortWidth
+        / Math.tan(this.horizontalFieldOfView);
       // todo move the camera
       // todo adjust vertical field of view as well?
     }
@@ -113,14 +114,15 @@ export class Camera {
     let rightDirection: Vector2; // perpendicular to the camera direction
     let nearLeftPoint: Vector2; // the nearest visible point on the left edge
     let nearRightPoint: Vector2; // the nearest visible point on the right edge
-    let leftEdgeRay: Vector2; // a ray going from the camera through the left edge points
-    let rightEdgeRay: Vector2; // a ray going from the camera through the right edge points
     let farLeftPoint: Vector2; // the farthest visible point on the left edge
     let farRightPoint: Vector2; // the farthest visible point on the right edge
+
     cameraDirection = new Vector2();
     // start by getting the direction the camera is facing
-    cameraDirection.x = (this.viewPortCenterPosition.x - this.cameraPosition.x) / this.viewPortDistance;
-    cameraDirection.y = (this.viewPortCenterPosition.y - this.cameraPosition.y) / this.viewPortDistance;
+    cameraDirection.x = (this.viewPortCenterPosition.x - this.cameraPosition.x)
+      / this.viewPortDistance;
+    cameraDirection.y = (this.viewPortCenterPosition.y - this.cameraPosition.y)
+      / this.viewPortDistance;
     console.log(
       'cameraDirection ('
       + cameraDirection.x + ', '
@@ -155,8 +157,10 @@ export class Camera {
     // now use the left and right directions to find the near points of the left and right edges
     // note: both x and y use width as magnitude because height will be z
     nearLeftPoint = new Vector2();
-    nearLeftPoint.x = this.viewPortCenterPosition.x + leftDirection.x * this.viewPortWidth / 2;
-    nearLeftPoint.y = this.viewPortCenterPosition.y + leftDirection.y * this.viewPortWidth / 2;
+    nearLeftPoint.x = this.viewPortCenterPosition.x
+      + leftDirection.x * this.viewPortWidth / 2;
+    nearLeftPoint.y = this.viewPortCenterPosition.y
+      + leftDirection.y * this.viewPortWidth / 2;
     console.log(
       'nearLeftPoint ('
       + nearLeftPoint.x + ', '
@@ -164,22 +168,28 @@ export class Camera {
     );
 
     nearRightPoint = new Vector2();
-    nearRightPoint.x = this.viewPortCenterPosition.x + rightDirection.x * this.viewPortWidth / 2;
-    nearRightPoint.y = this.viewPortCenterPosition.y + rightDirection.y * this.viewPortWidth / 2;
+    nearRightPoint.x = this.viewPortCenterPosition.x
+      + rightDirection.x * this.viewPortWidth / 2;
+    nearRightPoint.y = this.viewPortCenterPosition.y
+      + rightDirection.y * this.viewPortWidth / 2;
     console.log(
       'nearRightPoint ('
       + nearRightPoint.x + ', '
       + nearRightPoint.y + ')'
     );
 
+    /*
+    // method 1 - rays from near points
     // now we need to calculate the direction from the camera to the left and right edges
+    let leftEdgeRay: Vector2; // a ray going from the camera through the left edge points
+    let rightEdgeRay: Vector2; // a ray going from the camera through the right edge points
     // todo figure out if I need to use view port distance or actual distance!
-    let nearDistance: number = 8;/*Math.sqrt(
-      (nearLeftPoint.x - this.cameraPosition.x)
-      * (nearLeftPoint.x - this.cameraPosition.x)
-      + (nearLeftPoint.y - this.cameraPosition.y)
-      * (nearLeftPoint.y - this.cameraPosition.y)
-    );*/
+    // let nearDistance: number = 8;Math.sqrt(
+    //   (nearLeftPoint.x - this.cameraPosition.x)
+    //   * (nearLeftPoint.x - this.cameraPosition.x)
+    //   + (nearLeftPoint.y - this.cameraPosition.y)
+    //   * (nearLeftPoint.y - this.cameraPosition.y)
+    // );
     console.log('nearDistance: ' + nearDistance);
     leftEdgeRay = new Vector2();
     leftEdgeRay.x = (nearLeftPoint.x - this.cameraPosition.x) / nearDistance;
@@ -216,7 +226,41 @@ export class Camera {
       + farRightPoint.x + ', '
       + farRightPoint.y + ')'
     );
+    */
 
+    // method 2 - rays out from ray out of view port center
+    let farCenterPoint: Vector2; // the center of the far view plane
+    let scaledViewPortWidth: number; // the view port width scaled to max distance
+    // start by projecting a ray out from the view port center using the camera direction and visible distance
+    farCenterPoint = new Vector2();
+    farCenterPoint.x = this.viewPortCenterPosition.x
+      + cameraDirection.x * this.visibleDistance;
+    farCenterPoint.y = this.viewPortCenterPosition.y
+      + cameraDirection.y * this.visibleDistance;
+
+    // now scale the view port width
+    scaledViewPortWidth = this.viewPortWidth / this.viewPortDistance * (this.viewPortDistance + this.visibleDistance);
+
+    farLeftPoint = new Vector2();
+    farLeftPoint.x = farCenterPoint.x
+      + leftDirection.x * scaledViewPortWidth;
+    farLeftPoint.y = farCenterPoint.y
+      + leftDirection.y * scaledViewPortWidth;
+    console.log(
+      'farLeftPoint ('
+      + farLeftPoint.x + ', '
+      + farLeftPoint.y + ')'
+    );
+    farRightPoint = new Vector2();
+    farRightPoint.x = farCenterPoint.x
+      + rightDirection.x * scaledViewPortWidth;
+    farRightPoint.y = farCenterPoint.y
+      + rightDirection.y * scaledViewPortWidth;
+    console.log(
+      'farRightPoint ('
+      + farRightPoint.x + ', '
+      + farRightPoint.y + ')'
+    );
     console.log('Camera exit calculateVisibleTrapezoid');
   }
 
