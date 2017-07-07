@@ -15,14 +15,14 @@ export class Camera {
   viewPortAspectRatio: number; // the aspect ratio of the view port
 
   // fov not currently used
-  horizontalFieldOfView: number; // angle in degrees
-  verticalFieldOfView: number; // angle in degrees
+  horizontalFieldOfView: number; // visible angle in degrees
+  verticalFieldOfView: number; // visible angle in degrees
 
   // todo have viewPortDistance calculated by fov and viewPortWidth
   viewPortDistance: number; // the distance from the camera to the view port center
   visibleDistance: number; // the distance drawn beyond the view port
 
-  resolution: number; // number of rays to send out per degree
+  resolution: number; // converts from view port units to pixels on buffer canvas
 
   bufferCanvas: HTMLCanvasElement; // canvas used for rendering frame
   bufferCanvasWidth: number; // the width of the buffer canvas
@@ -38,7 +38,8 @@ export class Camera {
     this.viewPortHeight = 3;
     this.viewPortAspectRatio = this.viewPortWidth / this.viewPortHeight;
 
-    // todo have this calculated using fov
+    // todo have this calculated using fov?
+    // or use this to calculate fov?
     this.viewPortDistance = 8;
 
     this.visibleDistance = 25;
@@ -80,15 +81,158 @@ export class Camera {
     else {
       this.horizontalFieldOfView = horizontalFieldOfView;
       // todo recalculate other values affected by change in horizontal field of view
+      // todo move the camera
+      let cameraDirection: Vector3;
+      cameraDirection = this.calculateCameraDirection();
+
       this.viewPortDistance = this.viewPortWidth
         / Math.tan(this.horizontalFieldOfView);
-      // todo move the camera
+
+      let cameraMovement: Vector3;
+      cameraMovement = cameraDirection.clone()
+        .scale(this.viewPortDistance);
+
+      this.cameraPosition = this.viewPortCenterPosition.clone()
+        .subtractVector(cameraMovement);
+
       // todo adjust vertical field of view as well?
+      // if the camera was moved either the view port height or the
+      // vertical field of view must be updated
     }
     console.log('horizontalFieldOfView: ' + this.horizontalFieldOfView);
     console.log('Camera exit setHorizontalFieldOfView');
   }
 
+  setMap(map: Map): void {
+    console.log('Camera enter setMap');
+    this.map = map;
+    console.log('Camera exit setMap');
+  }
+
+  setCameraPosition(cameraPosition: Vector3): void {
+    console.log('Camera enter setCameraPosition');
+    this.cameraPosition = cameraPosition;
+    console.log('Camera exit setCameraPosition');
+  }
+
+  setViewPortCenterPosition(viewPortCenterPosition: Vector3): void {
+    console.log('Camera enter setViewPortCenterPosition');
+    this.viewPortCenterPosition = viewPortCenterPosition;
+    console.log('Camera exit setViewPortCenterPosition');
+  }
+
+  getViewPortDistance(): number {
+    console.log('Camera enter getViewPortDistance');
+    console.log('viewPortDistance: ' + this.viewPortDistance);
+    console.log('Camera exit getViewPortDistance');
+    return this.viewPortDistance;
+  }
+
+  setViewPortDistance(viewPortDistance: number): void {
+    console.log('Camera enter setViewPortDistance');
+    if(viewPortDistance <= 0) {
+      console.log('error: view port distance must be a positive number')
+    }
+    else {
+      this.viewPortDistance = viewPortDistance;
+    }
+    console.log('Camera exit setViewPortDistance');
+  }
+
+  calculateCameraDirection(): Vector3 {
+    console.log('Camera enter calculateCameraDirection');
+    let cameraDirection: Vector3;
+    cameraDirection = this.viewPortCenterPosition.clone()
+      .subtractVector(this.cameraPosition)
+      .scale(1 / this.viewPortDistance);
+
+    console.log(
+      'cameraDirection ('
+      + cameraDirection.x + ', '
+      + cameraDirection.y + ', '
+      + cameraDirection.z + ')'
+    );
+    console.log('Camera exit calculateCameraDirection');
+    return cameraDirection;
+  }
+
+  calculateUpDirection(cameraDirection: Vector3): Vector3 {
+    console.log('Camera enter calculateUpDirection');
+    let upDirection: Vector3;
+    upDirection = new Vector3();
+    // I'm going to cheat for now, todo replace with actual calculations
+    // if/when the camera is able to have a different height than the view port
+    upDirection.setFromValues(
+      0, 0, 1
+    );
+    console.log(
+      'upDirection ('
+      + upDirection.x + ', '
+      + upDirection.y + ', '
+      + upDirection.z + ')'
+    );
+    console.log('Camera exit calculateUpDirection');
+    return upDirection;
+  }
+
+  calculateDownDirection(cameraDirection: Vector3): Vector3 {
+    console.log('Camera enter calculateDownDirection');
+    let downDirection: Vector3;
+    // I'm going to cheat for now, todo replace with actual calculations
+    // if/when the camera is able to have a different height than the view port
+    downDirection = new Vector3();
+    downDirection.setFromValues(
+      0, 0, -1
+    );
+    console.log(
+      'downDirection ('
+      + downDirection.x + ', '
+      + downDirection.y + ', '
+      + downDirection.z + ')'
+    );
+    console.log('Camera exit calculateDownDirection');
+    return downDirection;
+  }
+
+  calculateLeftDirection(cameraDirection: Vector3): Vector3 {
+    console.log('Camera enter calculateLeftDirection');
+    let leftDirection: Vector3;
+    // rotating 90 degrees counter-clockwise
+    // x' = x * cos(90) - y * sin(90)
+    // y' = x * sin(90) + y * cos(90)
+    leftDirection = new Vector3();
+    leftDirection.x = cameraDirection.x * 0 - cameraDirection.y * 1;
+    leftDirection.y = cameraDirection.x * 1 + cameraDirection.y * 0;
+    leftDirection.z = 0; // todo real calc? z should never be needed for left direction unless camera can roll/rotate around camera direction
+    console.log(
+      'leftDirection ('
+      + leftDirection.x + ', '
+      + leftDirection.y + ', '
+      + leftDirection.z + ')'
+    );
+    console.log('Camera exit calculateLeftDirection');
+    return leftDirection;
+  }
+
+  calculateRightDirection(cameraDirection: Vector3): Vector3 {
+    console.log('Camera enter calculateRightDirection');
+    let rightDirection: Vector3;
+    // rotating 90 degrees clockwise
+    // x' = x * cos(-90) - y * sin(-90)
+    // y' = x * sin(-90) + y * cos(-90)
+    rightDirection = new Vector3();
+    rightDirection.x = cameraDirection.x * 0 - cameraDirection.y * -1;
+    rightDirection.y = cameraDirection.x * -1 + cameraDirection.y * 0;
+    rightDirection.z = 0; // todo real calc? z should never be needed for right direction unless camera can roll/rotate around camera direction
+    console.log(
+      'rightDirection ('
+      + rightDirection.x + ', '
+      + rightDirection.y + ', '
+      + rightDirection.z + ')'
+    );
+    console.log('Camera exit calculateRightDirection');
+    return rightDirection;
+  }
 
   // shitty name
   calculateVisibleTrapezoid(): void {
@@ -221,9 +365,9 @@ export class Camera {
     console.log('Camera enter calculateViewFrustum');
     // just for this demo I'm going to set the view port and camera positions
     this.cameraPosition = new Vector3();
-    this.cameraPosition.x = 0;
-    this.cameraPosition.y = 0;
-    this.cameraPosition.z = 2;
+    this.cameraPosition.setFromValues(
+      0, 0, 2
+    );
     console.log(
       'cameraPosition ('
       + this.cameraPosition.x + ', '
@@ -232,8 +376,8 @@ export class Camera {
     );
 
     this.viewPortCenterPosition = new Vector3();
-    this.viewPortCenterPosition.x = 0;
-    this.viewPortCenterPosition.y = 8;
+    this.viewPortCenterPosition.x = Math.sqrt(8);
+    this.viewPortCenterPosition.y = Math.sqrt(8);
     this.viewPortCenterPosition.z = 2;
     console.log(
       'viewPortCenterPosition ('
@@ -247,160 +391,87 @@ export class Camera {
     let downDirection: Vector3;
     let leftDirection: Vector3;
     let rightDirection: Vector3;
-    let nearTopLeft: Vector3;
-    let nearTopRight: Vector3;
-    let nearBottomLeft: Vector3;
-    let nearBottomRight: Vector3;
-    let farTopLeft: Vector3;
-    let farTopRight: Vector3;
-    let farBottomLeft: Vector3;
-    let farBottomRight: Vector3;
+    let nearTopLeftPoint: Vector3;
+    let nearTopRightPoint: Vector3;
+    let nearBottomLeftPoint: Vector3;
+    let nearBottomRightPoint: Vector3;
+    let farTopLeftPoint: Vector3;
+    let farTopRightPoint: Vector3;
+    let farBottomLeftPoint: Vector3;
+    let farBottomRightPoint: Vector3;
 
     // start by calculating the camera direction
-    cameraDirection = new Vector3();
-    cameraDirection.x = (this.viewPortCenterPosition.x - this.cameraPosition.x)
-      / this.viewPortDistance;
-    cameraDirection.y = (this.viewPortCenterPosition.y - this.cameraPosition.y)
-      / this.viewPortDistance;
-    cameraDirection.z = (this.viewPortCenterPosition.z - this.cameraPosition.z)
-      / this.viewPortDistance;
-    console.log(
-      'cameraDirection ('
-      + cameraDirection.x + ', '
-      + cameraDirection.y + ', '
-      + cameraDirection.z + ')'
-    );
+    cameraDirection = this.calculateCameraDirection();
 
     // use the camera direction to calculate the 4 perpendicular directions
-    upDirection = new Vector3();
-    // I'm going to cheat for now, todo replace with actual calculations
-    upDirection.x = 0;
-    upDirection.y = 0;
-    upDirection.z = 1;
-    console.log(
-      'upDirection ('
-      + upDirection.x + ', '
-      + upDirection.y + ', '
-      + upDirection.z + ')'
-    );
-
-    downDirection = new Vector3();
-    downDirection.x = 0;
-    downDirection.y = 0;
-    downDirection.z = -1;
-    console.log(
-      'downDirection ('
-      + downDirection.x + ', '
-      + downDirection.y + ', '
-      + downDirection.z + ')'
-    );
-
-    // rotating 90 degrees counter-clockwise
-    // x' = x * cos(90) - y * sin(90)
-    // y' = x * sin(90) + y * cos(90)
-    leftDirection = new Vector3();
-    leftDirection.x = cameraDirection.x * 0 - cameraDirection.y * 1;
-    leftDirection.y = cameraDirection.x * 1 + cameraDirection.y * 0;
-    leftDirection.z = 0; // todo real calc
-    console.log(
-      'leftDirection ('
-      + leftDirection.x + ', '
-      + leftDirection.y + ', '
-      + leftDirection.z + ')'
-    );
-
-    // rotating 90 degrees clockwise
-    // x' = x * cos(-90) - y * sin(-90)
-    // y' = x * sin(-90) + y * cos(-90)
-    rightDirection = new Vector3();
-    rightDirection.x = cameraDirection.x * 0 - cameraDirection.y * -1;
-    rightDirection.y = cameraDirection.x * -1 + cameraDirection.y * 0;
-    rightDirection.z = 0; // todo real calc
-    console.log(
-      'rightDirection ('
-      + rightDirection.x + ', '
-      + rightDirection.y + ', '
-      + rightDirection.z + ')'
-    );
+    upDirection = this.calculateUpDirection(cameraDirection);
+    downDirection = this.calculateDownDirection(cameraDirection);
+    leftDirection = this.calculateLeftDirection(cameraDirection);
+    rightDirection = this.calculateRightDirection(cameraDirection);
 
     // use these directions and the view port dimensions to find the near points
-    nearTopLeft = new Vector3();
-    nearTopLeft.x = this.viewPortCenterPosition.x
-      + leftDirection.x * this.viewPortWidth / 2
-      + upDirection.x * this.viewPortHeight / 2;
-    nearTopLeft.y = this.viewPortCenterPosition.y
-      + leftDirection.y * this.viewPortWidth / 2
-      + upDirection.y * this.viewPortHeight / 2;
-    nearTopLeft.z = this.viewPortCenterPosition.z
-      + leftDirection.z * this.viewPortWidth / 2
-      + upDirection.z * this.viewPortHeight / 2;
+    let nearLeftMovement: Vector3;
+    let nearRightMovement: Vector3;
+    let nearTopMovement: Vector3;
+    let nearBottomMovement: Vector3;
+    nearLeftMovement = leftDirection.clone()
+      .scale(this.viewPortWidth / 2);
+    nearRightMovement = rightDirection.clone()
+      .scale(this.viewPortWidth / 2);
+    nearTopMovement = upDirection.clone()
+      .scale(this.viewPortHeight / 2);
+    nearBottomMovement = downDirection.clone()
+      .scale(this.viewPortHeight / 2);
+
+    nearTopLeftPoint = this.viewPortCenterPosition.clone()
+      .addVector(nearLeftMovement)
+      .addVector(nearTopMovement);
     console.log(
-      'nearTopLeft ('
-      + nearTopLeft.x + ', '
-      + nearTopLeft.y + ', '
-      + nearTopLeft.z + ')'
+      'nearTopLeftPoint ('
+      + nearTopLeftPoint.x + ', '
+      + nearTopLeftPoint.y + ', '
+      + nearTopLeftPoint.z + ')'
     );
 
-    nearTopRight = new Vector3();
-    nearTopRight.x = this.viewPortCenterPosition.x
-      + rightDirection.x * this.viewPortWidth / 2
-      + upDirection.x * this.viewPortHeight / 2;
-    nearTopRight.y = this.viewPortCenterPosition.y
-      + rightDirection.y * this.viewPortWidth / 2
-      + upDirection.y * this.viewPortHeight / 2;
-    nearTopRight.z = this.viewPortCenterPosition.z
-      + rightDirection.z * this.viewPortWidth / 2
-      + upDirection.z * this.viewPortHeight / 2;
+    nearTopRightPoint = this.viewPortCenterPosition.clone()
+      .addVector(nearLeftMovement)
+      .addVector(nearTopMovement);
     console.log(
-      'nearTopRight ('
-      + nearTopRight.x + ', '
-      + nearTopRight.y + ', '
-      + nearTopRight.z + ')'
+      'nearTopRightPoint ('
+      + nearTopRightPoint.x + ', '
+      + nearTopRightPoint.y + ', '
+      + nearTopRightPoint.z + ')'
     );
 
-    nearBottomLeft = new Vector3();
-    nearBottomLeft.x = this.viewPortCenterPosition.x
-      + leftDirection.x * this.viewPortWidth / 2
-      + downDirection.x * this.viewPortHeight / 2;
-    nearBottomLeft.y = this.viewPortCenterPosition.y
-      + leftDirection.y * this.viewPortWidth / 2
-      + downDirection.y * this.viewPortHeight / 2;
-    nearBottomLeft.z = this.viewPortCenterPosition.z
-      + leftDirection.z * this.viewPortWidth / 2
-      + downDirection.z * this.viewPortHeight / 2;
+    nearBottomLeftPoint = this.viewPortCenterPosition.clone()
+      .addVector(nearLeftMovement)
+      .addVector(nearBottomMovement);
     console.log(
-      'nearBottomLeft ('
-      + nearBottomLeft.x + ', '
-      + nearBottomLeft.y + ', '
-      + nearBottomLeft.z + ')'
+      'nearBottomLeftPoint ('
+      + nearBottomLeftPoint.x + ', '
+      + nearBottomLeftPoint.y + ', '
+      + nearBottomLeftPoint.z + ')'
     );
 
-    nearBottomRight = new Vector3();
-    nearBottomRight.x = this.viewPortCenterPosition.x
-      + rightDirection.x * this.viewPortWidth / 2
-      + downDirection.x * this.viewPortHeight / 2;
-    nearBottomRight.y = this.viewPortCenterPosition.y
-      + rightDirection.y * this.viewPortWidth / 2
-      + downDirection.y * this.viewPortHeight / 2;
-    nearBottomRight.z = this.viewPortCenterPosition.z
-      + rightDirection.z * this.viewPortWidth / 2
-      + downDirection.z * this.viewPortHeight / 2;
+    nearBottomRightPoint = this.viewPortCenterPosition.clone()
+      .addVector(nearRightMovement)
+      .addVector(nearBottomMovement);
     console.log(
-      'nearBottomRight ('
-      + nearBottomRight.x + ', '
-      + nearBottomRight.y + ', '
-      + nearBottomRight.z + ')'
+      'nearBottomRightPoint ('
+      + nearBottomRightPoint.x + ', '
+      + nearBottomRightPoint.y + ', '
+      + nearBottomRightPoint.z + ')'
     );
 
     // now extend out from the view port center
+    let farMovement: Vector3;
     let farViewCenter: Vector3;
-    farViewCenter = new Vector3();
-    farViewCenter.x = this.viewPortCenterPosition.x
-      + cameraDirection.x * this.visibleDistance;
-    farViewCenter.y = this.viewPortCenterPosition.y
-      + cameraDirection.y * this.visibleDistance;
-    farViewCenter.z = this.viewPortCenterPosition.z
-      + cameraDirection.z * this.visibleDistance;
+
+    farMovement = cameraDirection.clone()
+      .scale(this.visibleDistance);
+
+    farViewCenter = this.viewPortCenterPosition.clone()
+      .addVector(farMovement);
     console.log(
       'farViewCenter ('
       + farViewCenter.x + ', '
@@ -418,76 +489,83 @@ export class Camera {
       / this.viewPortDistance
       * (this.viewPortDistance + this.visibleDistance);
 
+    // now calculate the far direction movements
+    let farLeftMovement: Vector3;
+    let farRightMovement: Vector3;
+    let farTopMovement: Vector3;
+    let farBottomMovement: Vector3;
+
+    farLeftMovement = leftDirection.clone()
+      .scale(scaledViewPortWidth / 2);
+    farRightMovement = rightDirection.clone()
+      .scale(scaledViewPortWidth / 2);
+    farTopMovement = upDirection.clone()
+      .scale(scaledViewPortHeight / 2);
+    farBottomMovement = downDirection.clone()
+      .scale(scaledViewPortHeight / 2);
+
     // now use these to find the far points
-    farTopLeft = new Vector3();
-    farTopLeft.x = farViewCenter.x
-      + leftDirection.x * scaledViewPortWidth / 2
-      + upDirection.x * scaledViewPortHeight / 2;
-    farTopLeft.y = farViewCenter.y
-      + leftDirection.y * scaledViewPortWidth / 2
-      + upDirection.y * scaledViewPortHeight / 2;
-    farTopLeft.z = farViewCenter.z
-      + leftDirection.z * scaledViewPortWidth / 2
-      + upDirection.z * scaledViewPortHeight / 2;
+    farTopLeftPoint = farViewCenter.clone()
+      .addVector(farLeftMovement)
+      .addVector(farTopMovement);
     console.log(
-      'farTopLeft ('
-      + farTopLeft.x + ', '
-      + farTopLeft.y + ', '
-      + farTopLeft.z + ')'
+      'farTopLeftPoint ('
+      + farTopLeftPoint.x + ', '
+      + farTopLeftPoint.y + ', '
+      + farTopLeftPoint.z + ')'
     );
 
-    farTopRight = new Vector3();
-    farTopRight.x = farViewCenter.x
-      + rightDirection.x * scaledViewPortWidth / 2
-      + upDirection.x * scaledViewPortHeight / 2;
-    farTopRight.y = farViewCenter.y
-      + rightDirection.y * scaledViewPortWidth / 2
-      + upDirection.y * scaledViewPortHeight / 2;
-    farTopRight.z = farViewCenter.z
-      + rightDirection.z * scaledViewPortWidth / 2
-      + upDirection.z * scaledViewPortHeight / 2;
+    farTopRightPoint = farViewCenter.clone()
+      .addVector(farRightMovement)
+      .addVector(farTopMovement);
     console.log(
-      'farTopRight ('
-      + farTopRight.x + ', '
-      + farTopRight.y + ', '
-      + farTopRight.z + ')'
+      'farTopRightPoint ('
+      + farTopRightPoint.x + ', '
+      + farTopRightPoint.y + ', '
+      + farTopRightPoint.z + ')'
     );
 
-    farBottomLeft = new Vector3();
-    farBottomLeft.x = farViewCenter.x
-      + leftDirection.x * scaledViewPortWidth / 2
-      + downDirection.x * scaledViewPortHeight / 2;
-    farBottomLeft.y = farViewCenter.y
-      + leftDirection.y * scaledViewPortWidth / 2
-      + downDirection.y * scaledViewPortHeight / 2;
-    farBottomLeft.z = farViewCenter.z
-      + leftDirection.z * scaledViewPortWidth / 2
-      + downDirection.z * scaledViewPortHeight / 2;
+    farBottomLeftPoint = farViewCenter.clone()
+      .addVector(farLeftMovement)
+      .addVector(farBottomMovement);
     console.log(
-      'farBottomLeft ('
-      + farBottomLeft.x + ', '
-      + farBottomLeft.y + ', '
-      + farBottomLeft.z + ')'
+      'farBottomLeftPoint ('
+      + farBottomLeftPoint.x + ', '
+      + farBottomLeftPoint.y + ', '
+      + farBottomLeftPoint.z + ')'
     );
 
-    farBottomRight = new Vector3();
-    farBottomRight.x = farViewCenter.x
-      + rightDirection.x * scaledViewPortWidth / 2
-      + downDirection.x * scaledViewPortHeight / 2;
-    farBottomRight.y = farViewCenter.y
-      + rightDirection.y * scaledViewPortWidth / 2
-      + downDirection.y * scaledViewPortHeight / 2;
-    farBottomRight.z = farViewCenter.z
-      + rightDirection.z * scaledViewPortWidth / 2
-      + downDirection.z * scaledViewPortHeight / 2;
+    farBottomRightPoint = farViewCenter.clone()
+      .addVector(farRightMovement)
+      .addVector(farBottomMovement);
     console.log(
-      'farBottomRight ('
-      + farBottomRight.x + ', '
-      + farBottomRight.y + ', '
-      + farBottomRight.z + ')'
+      'farBottomRightPoint ('
+      + farBottomRightPoint.x + ', '
+      + farBottomRightPoint.y + ', '
+      + farBottomRightPoint.z + ')'
     );
 
     console.log('Camera exit calculateViewFrustum');
+  }
+
+  turnLeft(): void {
+    console.log('Camera enter turnLeft');
+    // todo
+    // rotate the camera direction
+    // recalculate the other directions
+    // move the camera
+    // recalculate the view frustum
+    console.log('Camera exit turnLeft');
+  }
+
+  turnRight(): void {
+    console.log('Camera enter turnRight');
+    // todo
+    // rotate the camera direction
+    // recalculate the other directions
+    // move the camera
+    // recalculate the view frustum
+    console.log('Camera exit turnRight');
   }
 
   renderFrame(): void {

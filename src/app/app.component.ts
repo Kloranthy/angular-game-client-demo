@@ -50,14 +50,21 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     console.log('AppComponent enter ngAfterViewInit');
+    // create the camera
     this.camera = new Camera();
-    this.camera.canvasComponent = this.canvas;
-    this.camera.calculateViewFrustum();
+    this.camera.setCanvasComponent(this.canvas);
+    //this.camera.calculateViewFrustum();
+    // create the map
     this.map = new Map();
+    this.map.hardCodedDemo();
+    this.map.placeCameraHardCodedDemo(this.camera);
+    // pass references to the input processor
     this.inputProcessor.setCamera(this.camera);
     this.inputProcessor.setMap(this.map);
+    // resize the ui elements
     this.calculateElementDimensions();
     this.resizeElements();
+    // todo add a periodic check for change in window dimensions
     console.log('AppComponent exit ngAfterViewInit');
   }
 
