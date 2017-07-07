@@ -52,7 +52,7 @@ export class AppComponent implements AfterViewInit {
     console.log('AppComponent enter ngAfterViewInit');
     this.camera = new Camera();
     this.camera.canvasComponent = this.canvas;
-    this.camera.calculateVisibleTrapezoid();
+    this.camera.calculateViewFrustum();
     this.map = new Map();
     this.inputProcessor.setCamera(this.camera);
     this.inputProcessor.setMap(this.map);
