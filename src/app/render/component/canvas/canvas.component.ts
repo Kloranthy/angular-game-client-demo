@@ -2,7 +2,6 @@ import {
   Component, ViewChild, ElementRef, AfterViewInit
 } from '@angular/core';
 
-import { Coordinates } from '../../model/coordinates';
 import { Camera } from '../../model/camera';
 
 @Component({

@@ -9,7 +9,6 @@ export class RightControlComponent {
   @Output() onControlPressed;
   width: number;
   height: number;
-  order: number;
 
   constructor() {
     this.onControlPressed = new EventEmitter<string>();
@@ -48,4 +47,8 @@ export class RightControlComponent {
     this.onControlPressed.emit('render test');
   }
 
+  mapTest(): void {
+    console.log('map test pressed');
+    this.onControlPressed.emit('map test');
+  }
 }

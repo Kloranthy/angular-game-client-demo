@@ -11,6 +11,8 @@ import { InputProcessorService } from './control/service/input-processor.service
 
 import { Camera } from './render/model/camera';
 
+import { Map } from './render/model/map';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -21,6 +23,8 @@ export class AppComponent implements AfterViewInit {
   windowHeight: number; // the height of the window
 
   camera: Camera; // todo description
+
+  map: Map; // todo description
 
   minControlWidth: number; // the minimum width of the control containers
   controlWidth: number;
@@ -46,21 +50,19 @@ export class AppComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     console.log('AppComponent enter ngAfterViewInit');
-    this.camera = new Camera(
-      this.canvas
-    );
+    this.camera = new Camera();
+    this.camera.canvasComponent = this.canvas;
+    this.camera.calculateVisibleTrapezoid();
+    this.map = new Map();
+    this.inputProcessor.setCamera(this.camera);
+    this.inputProcessor.setMap(this.map);
     this.calculateElementDimensions();
     this.resizeElements();
     console.log('AppComponent exit ngAfterViewInit');
   }
 
   onControlPressed(input: string): void {
-    if(input === 'render test') {
-      this.renderTest();
-    }
-    else {
-      this.inputProcessor.process(input);
-    }
+    this.inputProcessor.process(input);
   }
 
   renderTest():void {
@@ -126,6 +128,10 @@ export class AppComponent implements AfterViewInit {
         this.controlWidth,
         this.controlHeight
       ),
+      0
+    );
+    setTimeout(
+      () => this.canvas.viewPortAspectRatio = this.camera.viewPortAspectRatio,
       0
     );
     setTimeout(

@@ -1,11 +1,33 @@
 import { Injectable } from '@angular/core';
 
+import { Camera } from '../../render/model/camera';
+import { Map } from '../../render/model/map';
+
 @Injectable()
 export class InputProcessorService {
+  // putting camera and map in here for now
+  // so that input processor has access
+  // may remove later
+  camera: Camera;
+
+  map: Map;
+
 
   constructor() {
     console.log('InputProcessorService enter constructor');
     console.log('InputProcessorService exit constructor');
+  }
+
+  setCamera(camera: Camera) {
+    console.log('InputProcessorService enter setCamera');
+    this.camera = camera;
+    console.log('InputProcessorService exit setCamera');
+  }
+
+  setMap(map: Map) {
+    console.log('InputProcessorService enter setMap');
+    this.map = map;
+    console.log('InputProcessorService exit setMap');
   }
 
   process(input: string): void {
@@ -37,7 +59,20 @@ export class InputProcessorService {
         this.targetRight();
         break;
       case 'render test' :
-        //this.renderTest();
+        if(this.camera) {
+          this.camera.renderFrame();
+        }
+        else {
+          console.log('error: camera not set in input processor');
+        }
+        break;
+      case 'map test' :
+        if(this.map) {
+          this.map.generate();
+        }
+        else {
+          console.log('error: map not set in input processor');
+        }
         break;
     }
     console.log('InputProcessorService exit process');

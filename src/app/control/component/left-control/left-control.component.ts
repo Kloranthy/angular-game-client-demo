@@ -33,7 +33,7 @@ export class LeftControlComponent {
     }
     this.width = width;
     this.height = height;
-    console.log('LeftControlComponent left-control exit resize');
+    console.log('LeftControlComponent exit resize');
   }
 
   turnLeft(): void {
