@@ -243,9 +243,9 @@ export class Camera {
 
     farLeftPoint = new Vector2();
     farLeftPoint.x = farCenterPoint.x
-      + leftDirection.x * scaledViewPortWidth;
+      + leftDirection.x * scaledViewPortWidth / 2;
     farLeftPoint.y = farCenterPoint.y
-      + leftDirection.y * scaledViewPortWidth;
+      + leftDirection.y * scaledViewPortWidth / 2;
     console.log(
       'farLeftPoint ('
       + farLeftPoint.x + ', '
@@ -253,9 +253,9 @@ export class Camera {
     );
     farRightPoint = new Vector2();
     farRightPoint.x = farCenterPoint.x
-      + rightDirection.x * scaledViewPortWidth;
+      + rightDirection.x * scaledViewPortWidth / 2;
     farRightPoint.y = farCenterPoint.y
-      + rightDirection.y * scaledViewPortWidth;
+      + rightDirection.y * scaledViewPortWidth / 2;
     console.log(
       'farRightPoint ('
       + farRightPoint.x + ', '
