@@ -55,22 +55,31 @@ export class Plane {
 
   setFromPlane(plane: Plane): Plane {
     this.logger.logDebug('enter setFromPlane');
-    return this.setFromValues(
+    this.setFromValues(
       plane.normal,
       plane.distance
     );
+    this.logger.logDebug('exit setFromPlane');
+    return this;
   }
 
   distanceBetweenPlaneAndPoint(
     point: Vector3
   ): number {
     this.logger.logDebug('enter distanceBetweenPlaneAndPoint');
-    return this.normal.dot(point) + this.distance;
+    let dotProduct: number;
+    dotProduct = this.normal.dot(point) + this.distance;
+    this.logger.logVerbose('distance: ' + dotProduct);
+    this.logger.logDebug('exit distanceBetweenPlaneAndPoint');
+    return dotProduct;
   }
 
   clone(): Plane {
     this.logger.logDebug('enter clone');
-    return new Plane()
+    let clone: Plane;
+    clone = new Plane()
       .setFromPlane(this);
+    this.logger.logDebug('exit clone');
+    return clone;
   }
 }

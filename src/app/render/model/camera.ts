@@ -40,7 +40,7 @@ export class Camera {
   canvasComponent: CanvasComponent; // component that displays rendered frames
 
   constructor() {
-    console.log('Camera enter constructor');
+    this.logger.logDebug('enter constructor');
     this.viewPortWidth = 5;
     this.viewPortHeight = 3;
     this.viewPortAspectRatio = this.viewPortWidth / this.viewPortHeight;
@@ -61,110 +61,115 @@ export class Camera {
     this.bufferCanvas.height = this.bufferCanvasHeight;
 
     this.renderContext = this.bufferCanvas.getContext('2d');
-    console.log('Camera exit constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   setCanvasComponent(canvasComponent: CanvasComponent): void {
+    this.logger.logDebug('enter setCanvasComponent');
     this.canvasComponent = canvasComponent;
     this.canvasComponent.viewPortAspectRatio = this.viewPortAspectRatio;
+    this.logger.logDebug('exit setCanvasComponent');
   }
 
   getViewPortAspectRatio(): number {
-    console.log('Camera enter getViewPortAspectRatio');
-    console.log('viewPortAspectRatio: ' + this.viewPortAspectRatio);
-    console.log('Camera exit getViewPortAspectRatio');
+    this.logger.logDebug('enter getViewPortAspectRatio');
+    this.logger.logVerbose('viewPortAspectRatio: ' + this.viewPortAspectRatio);
+    this.logger.logDebug('exit getViewPortAspectRatio');
     return this.viewPortAspectRatio;
   }
 
   // todo add methods for adjusting fov
   setHorizontalFieldOfView(horizontalFieldOfView: number): void {
-    console.log('Camera enter setHorizontalFieldOfView');
+    this.logger.logDebug('enter setHorizontalFieldOfView');
     if(horizontalFieldOfView <= 0) {
-      console.log('error: horizontal field of view must be positive');
+      this.logger.logError('horizontal field of view must be positive');
+      this.logger.logDebug('exit setHorizontalFieldOfView');
+      return;
     }
-    else if(horizontalFieldOfView >= 180) {
-      console.log('error: horizontal field of view must be less than 180');
+    if(horizontalFieldOfView >= 180) {
+      this.logger.logError('horizontal field of view must be less than 180');
+      this.logger.logDebug('exit setHorizontalFieldOfView');
+      return;
     }
-    else {
-      this.horizontalFieldOfView = horizontalFieldOfView;
-      // todo recalculate other values affected by change in horizontal field of view
-      // todo move the camera
-      let cameraDirection: Vector3;
-      cameraDirection = this.calculateCameraDirection();
+    this.horizontalFieldOfView = horizontalFieldOfView;
+    // todo recalculate other values affected by change in horizontal field of view
+    // todo move the camera
+    let cameraDirection: Vector3;
+    cameraDirection = this.calculateCameraDirection();
 
-      this.viewPortDistance = this.viewPortWidth
-        / Math.tan(this.horizontalFieldOfView);
+    this.viewPortDistance = this.viewPortWidth
+      / Math.tan(this.horizontalFieldOfView);
 
-      let cameraMovement: Vector3;
-      cameraMovement = cameraDirection.clone()
-        .scale(this.viewPortDistance);
+    let cameraMovement: Vector3;
+    cameraMovement = cameraDirection.clone()
+      .scale(this.viewPortDistance);
 
-      this.cameraPosition = this.viewPortCenterPosition.clone()
-        .subtractVector(cameraMovement);
+    this.cameraPosition = this.viewPortCenterPosition.clone()
+      .subtractVector(cameraMovement);
 
-      // todo adjust vertical field of view as well?
-      // if the camera was moved either the view port height or the
-      // vertical field of view must be updated
-    }
-    console.log('horizontalFieldOfView: ' + this.horizontalFieldOfView);
-    console.log('Camera exit setHorizontalFieldOfView');
+    // todo adjust vertical field of view as well?
+    // if the camera was moved either the view port height or the
+    // vertical field of view must be updated
+    this.logger.logVerbose('horizontalFieldOfView: ' + this.horizontalFieldOfView);
+    this.logger.logDebug('exit setHorizontalFieldOfView');
   }
 
   setMap(map: Map): void {
-    console.log('Camera enter setMap');
+    this.logger.logDebug('enter setMap');
     this.map = map;
-    console.log('Camera exit setMap');
+    this.logger.logDebug('exit setMap');
   }
 
   setCameraPosition(cameraPosition: Vector3): void {
-    console.log('Camera enter setCameraPosition');
+    this.logger.logDebug('enter setCameraPosition');
     this.cameraPosition = cameraPosition;
-    console.log('Camera exit setCameraPosition');
+    this.logger.logDebug('exit setCameraPosition');
   }
 
   setViewPortCenterPosition(viewPortCenterPosition: Vector3): void {
-    console.log('Camera enter setViewPortCenterPosition');
+    this.logger.logDebug('enter setViewPortCenterPosition');
     this.viewPortCenterPosition = viewPortCenterPosition;
-    console.log('Camera exit setViewPortCenterPosition');
+    this.logger.logDebug('exit setViewPortCenterPosition');
   }
 
   getViewPortDistance(): number {
-    console.log('Camera enter getViewPortDistance');
-    console.log('viewPortDistance: ' + this.viewPortDistance);
-    console.log('Camera exit getViewPortDistance');
+    this.logger.logDebug('enter getViewPortDistance');
+    this.logger.logVerbose('viewPortDistance: ' + this.viewPortDistance);
+    this.logger.logDebug('exit getViewPortDistance');
     return this.viewPortDistance;
   }
 
   setViewPortDistance(viewPortDistance: number): void {
-    console.log('Camera enter setViewPortDistance');
+    this.logger.logDebug('enter setViewPortDistance');
     if(viewPortDistance <= 0) {
-      console.log('error: view port distance must be a positive number')
+      this.logger.logError('view port distance must be a positive number');
+      this.logger.logDebug('exit setViewPortDistance');
+      return;
     }
-    else {
-      this.viewPortDistance = viewPortDistance;
-    }
-    console.log('Camera exit setViewPortDistance');
+    this.viewPortDistance = viewPortDistance;
+    this.logger.logVerbose('viewPortDistance: ' + this.viewPortDistance);
+    this.logger.logDebug('exit setViewPortDistance');
   }
 
   calculateCameraDirection(): Vector3 {
-    console.log('Camera enter calculateCameraDirection');
+    this.logger.logDebug('enter calculateCameraDirection');
     let cameraDirection: Vector3;
     cameraDirection = this.viewPortCenterPosition.clone()
       .subtractVector(this.cameraPosition)
       .scale(1 / this.viewPortDistance);
 
-    console.log(
+    this.logger.logVerbose(
       'cameraDirection ('
       + cameraDirection.x + ', '
       + cameraDirection.y + ', '
       + cameraDirection.z + ')'
     );
-    console.log('Camera exit calculateCameraDirection');
+    this.logger.logDebug('exit calculateCameraDirection');
     return cameraDirection;
   }
 
   calculateUpDirection(cameraDirection: Vector3): Vector3 {
-    console.log('Camera enter calculateUpDirection');
+    this.logger.logDebug('enter calculateUpDirection');
     let upDirection: Vector3;
     upDirection = new Vector3();
     // I'm going to cheat for now, todo replace with actual calculations
@@ -172,18 +177,18 @@ export class Camera {
     upDirection.setFromValues(
       0, 0, 1
     );
-    console.log(
+    this.logger.logVerbose(
       'upDirection ('
       + upDirection.x + ', '
       + upDirection.y + ', '
       + upDirection.z + ')'
     );
-    console.log('Camera exit calculateUpDirection');
+    this.logger.logDebug('exit calculateUpDirection');
     return upDirection;
   }
 
   calculateDownDirection(cameraDirection: Vector3): Vector3 {
-    console.log('Camera enter calculateDownDirection');
+    this.logger.logDebug('enter calculateDownDirection');
     let downDirection: Vector3;
     // I'm going to cheat for now, todo replace with actual calculations
     // if/when the camera is able to have a different height than the view port
@@ -191,18 +196,18 @@ export class Camera {
     downDirection.setFromValues(
       0, 0, -1
     );
-    console.log(
+    this.logger.logVerbose(
       'downDirection ('
       + downDirection.x + ', '
       + downDirection.y + ', '
       + downDirection.z + ')'
     );
-    console.log('Camera exit calculateDownDirection');
+    this.logger.logDebug('exit calculateDownDirection');
     return downDirection;
   }
 
   calculateLeftDirection(cameraDirection: Vector3): Vector3 {
-    console.log('Camera enter calculateLeftDirection');
+    this.logger.logDebug('enter calculateLeftDirection');
     let leftDirection: Vector3;
     // rotating 90 degrees counter-clockwise
     // x' = x * cos(90) - y * sin(90)
@@ -211,18 +216,18 @@ export class Camera {
     leftDirection.x = cameraDirection.x * 0 - cameraDirection.y * 1;
     leftDirection.y = cameraDirection.x * 1 + cameraDirection.y * 0;
     leftDirection.z = 0; // todo real calc? z should never be needed for left direction unless camera can roll/rotate around camera direction
-    console.log(
+    this.logger.logVerbose(
       'leftDirection ('
       + leftDirection.x + ', '
       + leftDirection.y + ', '
       + leftDirection.z + ')'
     );
-    console.log('Camera exit calculateLeftDirection');
+    this.logger.logDebug('exit calculateLeftDirection');
     return leftDirection;
   }
 
   calculateRightDirection(cameraDirection: Vector3): Vector3 {
-    console.log('Camera enter calculateRightDirection');
+    this.logger.logDebug('enter calculateRightDirection');
     let rightDirection: Vector3;
     // rotating 90 degrees clockwise
     // x' = x * cos(-90) - y * sin(-90)
@@ -231,44 +236,49 @@ export class Camera {
     rightDirection.x = cameraDirection.x * 0 - cameraDirection.y * -1;
     rightDirection.y = cameraDirection.x * -1 + cameraDirection.y * 0;
     rightDirection.z = 0; // todo real calc? z should never be needed for right direction unless camera can roll/rotate around camera direction
-    console.log(
+    this.logger.logVerbose(
       'rightDirection ('
       + rightDirection.x + ', '
       + rightDirection.y + ', '
       + rightDirection.z + ')'
     );
-    console.log('Camera exit calculateRightDirection');
+    this.logger.logDebug('exit calculateRightDirection');
     return rightDirection;
   }
 
   calculateViewFrustum(): void {
-    console.log('Camera enter calculateViewFrustum');
+    this.logger.logDebug('enter calculateViewFrustum');
     this.viewFrustum = new Frustum().calculate(this);
-    console.log('Camera exit calculateViewFrustum');
+    this.logger.logDebug('exit calculateViewFrustum');
   }
 
   turnLeft(): void {
-    console.log('Camera enter turnLeft');
+    this.logger.logDebug('enter turnLeft');
     // todo
     // rotate the camera direction
     // recalculate the other directions
     // move the camera
     // recalculate the view frustum
-    console.log('Camera exit turnLeft');
+    this.logger.logDebug('exit turnLeft');
   }
 
   turnRight(): void {
-    console.log('Camera enter turnRight');
+    this.logger.logDebug('enter turnRight');
     // todo
     // rotate the camera direction
     // recalculate the other directions
     // move the camera
     // recalculate the view frustum
-    console.log('Camera exit turnRight');
+    this.logger.logDebug('exit turnRight');
   }
 
   renderFrame(): void {
-    console.log('Camera enter renderFrame');
+    this.logger.logDebug('enter renderFrame');
+    if(!this.canvasComponent) {
+      this.logger.logError('canvas component not set');
+      this.logger.logDebug('exit renderFrame');
+      return;
+    }
     // render frame onto frame buffer canvas
     this.clearFrame();
     this.renderContext.fillStyle = '#00ff00';
@@ -278,30 +288,25 @@ export class Camera {
     // draw from furthest away to nearest
     //this.drawLines();
     //this.drawRects();
-    if(this.canvasComponent) {
-      // have the canvas component draw the rendered frame
-      this.canvasComponent.drawFrame(
-        this.bufferCanvas
-      );
-    }
-    else {
-      console.log('error: canvas component not set');
-    }
-    console.log('Camera exit renderFrame');
+    // have the canvas component draw the rendered frame
+    this.canvasComponent.drawFrame(
+      this.bufferCanvas
+    );
+    this.logger.logDebug('exit renderFrame');
   }
 
   private clearFrame(): void {
-    console.log('Camera enter clearFrame');
+    this.logger.logDebug('enter clearFrame');
     this.renderContext.fillStyle = '#000000';
     this.fillRect(
       0, 0,
       this.bufferCanvasWidth, this.bufferCanvasHeight
     );
-    console.log('Camera exit clearFrame');
+    this.logger.logDebug('exit clearFrame');
   }
 /*
   private drawLines(): void {
-    console.log('Camera enter drawLines');
+    this.logger.logDebug('enter drawLines');
     let halfCanvasWidth: number;
     let halfCanvasHeight: number;
     let ix: number; // horizontal position relative to camera center
@@ -342,10 +347,10 @@ export class Camera {
         //halfCanvasWidth + px / this.viewPortWidth * halfCanvasWidth;
         toY = this.bufferCanvasHeight * (-py + this.viewPortHeight / 2) / this.viewPortHeight;
 
-        //console.log('fromX: ' + fromX);
-        //console.log('fromY: ' + fromY);
-        //console.log('toX: ' + toX);
-        //console.log('toY: ' + toY);
+        //this.logger.logVerbose('fromX: ' + fromX);
+        //this.logger.logVerbose('fromY: ' + fromY);
+        //this.logger.logVerbose('toX: ' + toX);
+        //this.logger.logVerbose('toY: ' + toY);
         this.drawLine(
           fromX, fromY,
           toX, toY
@@ -377,21 +382,21 @@ export class Camera {
         //halfCanvasWidth + px / this.viewPortWidth * halfCanvasWidth;
         toY = this.bufferCanvasHeight * (-py + this.viewPortHeight / 2) / this.viewPortHeight;
 
-        //console.log('fromX: ' + fromX);
-        //console.log('fromY: ' + fromY);
-        //console.log('toX: ' + toX);
-        //console.log('toY: ' + toY);
+        //this.logger.logVerbose('fromX: ' + fromX);
+        //this.logger.logVerbose('fromY: ' + fromY);
+        //this.logger.logVerbose('toX: ' + toX);
+        //this.logger.logVerbose('toY: ' + toY);
         this.drawLine(
           fromX, fromY,
           toX, toY
         );
       }
     }
-    console.log('Camera exit drawLines');
+    this.logger.logDebug('exit drawLines');
   }
 
   private drawRects(): void {
-    console.log('Camera enter drawRects');
+    this.logger.logDebug('enter drawRects');
     let id: number; // distance relative to camera
     let ix: number; // horizontal position relative to camera center
     let iy: number; // vertical position relative to camera center
@@ -427,17 +432,17 @@ export class Camera {
       drawWidth = this.bufferCanvasWidth * pw / this.viewPortWidth;
       drawHeight = this.bufferCanvasHeight * ph / this.viewPortHeight;
 
-      //console.log('fromX: ' + fromX);
-      //console.log('fromY: ' + fromY);
-      //console.log('drawWidth: ' + drawWidth);
-      //console.log('drawHeight: ' + drawHeight);
+      //this.logger.logVerbose('fromX: ' + fromX);
+      //this.logger.logVerbose('fromY: ' + fromY);
+      //this.logger.logVerbose('drawWidth: ' + drawWidth);
+      //this.logger.logVerbose('drawHeight: ' + drawHeight);
 
       this.strokeRect(
         fromX, fromY,
         drawWidth, drawHeight
       );
     }
-    console.log('Camera exit drawRects');
+    this.logger.logDebug('exit drawRects');
   }
 */
 
@@ -447,12 +452,12 @@ export class Camera {
     toX: number,
     toY: number
   ): void {
-    console.log('Camera enter strokeRect');
+    this.logger.logDebug('enter strokeRect');
     this.renderContext.strokeRect(
       fromX, fromY,
       toX, toY
     );
-    console.log('Camera exit strokeRect');
+    this.logger.logDebug('exit strokeRect');
   }
 
   private fillRect(
@@ -461,12 +466,12 @@ export class Camera {
     toX: number,
     toY: number
   ): void {
-    console.log('Camera enter fillRect');
+    this.logger.logDebug('enter fillRect');
     this.renderContext.fillRect(
       fromX, fromY,
       toX, toY
     );
-    console.log('Camera exit fillRect');
+    this.logger.logDebug('exit fillRect');
   }
 
   private drawLine(
@@ -475,11 +480,11 @@ export class Camera {
     toX: number,
     toY: number
   ): void {
-    console.log('Camera enter drawLine');
+    this.logger.logDebug('enter drawLine');
     this.renderContext.beginPath();
     this.renderContext.moveTo(fromX, fromY);
     this.renderContext.lineTo(toX, toY);
     this.renderContext.stroke();
-    console.log('Camera exit drawLine');
+    this.logger.logDebug('exit drawLine');
   }
 }

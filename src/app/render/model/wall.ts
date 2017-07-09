@@ -1,22 +1,32 @@
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 import { Entity } from './entity';
 
 export class Wall extends Entity {
+  logger: Logger = LoggingService.getLogger('Wall');
   // todo have multiple sprites, retrieve based on view angle
   image: string;
 
   constructor() {
-    //console.log('Wall enter constructor');
     super();
-    //console.log('Wall exit constructor');
+    this.logger.logDebug('enter constructor after super');
+    this.logger.logDebug('exit constructor');
   }
 
   getWallId(): string {
-    //console.log('Wall enter getEntityId');
-    return super.getEntityId();
+    this.logger.logDebug('enter getWallId');
+    let wallId: string;
+    wallId = super.getEntityId();
+    this.logger.logVerbose('wallId: ' + wallId);
+    this.logger.logDebug('exit getWallId');
+    return wallId;
   }
 
   setWallId(wallId: string): void {
-    //console.log('Wall enter setEntityId');
+    this.logger.logDebug('enter setWallId');
     super.setEntityId(wallId);
+    this.logger.logVerbose('wallId: ' + wallId);
+    this.logger.logDebug('exit setWallId');
   }
 }

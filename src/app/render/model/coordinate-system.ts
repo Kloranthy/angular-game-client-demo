@@ -1,20 +1,26 @@
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 import { Camera } from './camera';
 import { Vector3 } from './vector3';
 
 export class CoordinateSystem {
+  logger: Logger = LoggingService.getLogger('CoordinateSystem');
+
   xDirection: Vector3; // represents positive movement along the x axis
   yDirection: Vector3; // represents positive movement along the y axis
   zDirection: Vector3; // represents positive movement along the z axis
 
   constructor() {
-    console.log('CoordinateSystem enter constructor');
-    console.log('CoordinateSystem exit constructor');
+    this.logger.logDebug('enter constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   convertFromWorldToCamera(
     worldVector: Vector3,
     camera: Camera
   ): void {
+    this.logger.logDebug('enter convertFromWorldToCamera');
     // todo
 
     // compare the systems
@@ -42,11 +48,13 @@ export class CoordinateSystem {
 
     // first translate/move to align origins
     // then rotate
+    this.logger.logDebug('exit convertFromWorldToCamera');
   }
 
   // camera to viewport?
 
   convertFromCameraToScreen(): void {
+    this.logger.logDebug('enter convertFromCameraToScreen');
     // todo
 
     // compare the systems
@@ -68,5 +76,6 @@ export class CoordinateSystem {
     // sy = -cy
 
     // scale
+    this.logger.logDebug('exit convertFromCameraToScreen');
   }
 }

@@ -1,10 +1,15 @@
 import { Injectable } from '@angular/core';
 
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 import { Camera } from '../../render/model/camera';
 import { Map } from '../../render/model/map';
 
 @Injectable()
 export class InputProcessorService {
+  logger: Logger = LoggingService.getLogger('InputProcessorService');
+
   // putting camera and map in here for now
   // so that input processor has access
   // may remove later
@@ -14,25 +19,25 @@ export class InputProcessorService {
 
 
   constructor() {
-    console.log('InputProcessorService enter constructor');
-    console.log('InputProcessorService exit constructor');
+    this.logger.logDebug('enter constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   setCamera(camera: Camera) {
-    console.log('InputProcessorService enter setCamera');
+    this.logger.logDebug('enter setCamera');
     this.camera = camera;
-    console.log('InputProcessorService exit setCamera');
+    this.logger.logDebug('exit setCamera');
   }
 
   setMap(map: Map) {
-    console.log('InputProcessorService enter setMap');
+    this.logger.logDebug('enter setMap');
     this.map = map;
-    console.log('InputProcessorService exit setMap');
+    this.logger.logDebug('exit setMap');
   }
 
   process(input: string): void {
-    console.log('InputProcessorService enter process');
-    console.log(input);
+    this.logger.logDebug('enter process');
+    this.logger.logVerbose('input: ' + input);
     switch(input) {
       case 'move forward' :
         this.moveForward();
@@ -63,7 +68,7 @@ export class InputProcessorService {
           this.camera.renderFrame();
         }
         else {
-          console.log('error: camera not set in input processor');
+          this.logger.logError('camera not set in input processor');
         }
         break;
       case 'map test' :
@@ -71,39 +76,55 @@ export class InputProcessorService {
           this.map.generate();
         }
         else {
-          console.log('error: map not set in input processor');
+          this.logger.logError('map not set in input processor');
         }
         break;
     }
-    console.log('InputProcessorService exit process');
+    this.logger.logDebug('exit process');
   }
 
   moveForward(): void {
-    console.log('move forward processed');
+    this.logger.logDebug('enter moveForward');
+    this.logger.logVerbose('move forward processed');
+    this.logger.logDebug('exit moveForward');
   }
   moveLeft(): void {
-    console.log('move left processed');
+    this.logger.logDebug('enter moveLeft');
+    this.logger.logVerbose('move left processed');
+    this.logger.logDebug('exit moveLeft');
   }
   moveRight(): void {
-    console.log('move right processed');
+    this.logger.logDebug('enter moveRight');
+    this.logger.logVerbose('move right processed');
+    this.logger.logDebug('exit moveRight');
   }
   moveBackward(): void {
-    console.log('move back processed');
+    this.logger.logDebug('enter moveBackward');
+    this.logger.logVerbose('move back processed');
+    this.logger.logDebug('exit moveBackward');
   }
 
   turnLeft(): void {
-    console.log('turn left processed');
+    this.logger.logDebug('enter turnLeft');
+    this.logger.logVerbose('turn left processed');
+    this.logger.logDebug('exit turnLeft');
   }
 
   targetLeft(): void {
-    console.log('target left processed');
+    this.logger.logDebug('enter targetLeft');
+    this.logger.logVerbose('target left processed');
+    this.logger.logDebug('exit targetLeft');
   }
 
   turnRight(): void {
-    console.log('turn right processed');
+    this.logger.logDebug('enter turnRight');
+    this.logger.logVerbose('turn right processed');
+    this.logger.logDebug('exit turnRight');
   }
 
   targetRight(): void {
-    console.log('target right processed');
+    this.logger.logDebug('enter targetRight');
+    this.logger.logVerbose('target right processed');
+    this.logger.logDebug('exit targetRight');
   }
 }

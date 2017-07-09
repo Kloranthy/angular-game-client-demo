@@ -44,6 +44,7 @@ export class Frustum {
     nearPlane: Plane,
     farPlane: Plane
   ): Frustum {
+    this.logger.logDebug('enter setFromValues');
     this.nearTopLeftPoint = nearTopLeftPoint;
     this.nearTopRightPoint = nearTopRightPoint;
     this.nearBottomLeftPoint = nearBottomLeftPoint;
@@ -58,11 +59,13 @@ export class Frustum {
     this.bottomPlane = bottomPlane;
     this.nearPlane = nearPlane;
     this.farPlane = farPlane;
+    this.logger.logDebug('exit setFromValues');
     return this;
   }
 
   setFromFrustum(frustum: Frustum): Frustum {
-    return this.setFromValues(
+    this.logger.logDebug('enter setFromFrustum');
+    this.setFromValues(
       frustum.nearTopLeftPoint,
       frustum.nearTopRightPoint,
       frustum.nearBottomLeftPoint,
@@ -78,14 +81,16 @@ export class Frustum {
       frustum.nearPlane,
       frustum.farPlane
     );
+    this.logger.logDebug('exit setFromFrustum');
+    return this;
   }
 
   calculate(
     camera: Camera
   ): Frustum {
     this.logger.logDebug('enter calculate');
-    this.calculatePoints(camera)
-      .calculatePlanes();
+    this.calculatePoints(camera);
+    this.calculatePlanes();
     this.logger.logDebug('exit calculate');
     return this;
   }
@@ -304,11 +309,16 @@ export class Frustum {
   }
 
   clone(): Frustum {
-    return new Frustum()
+    this.logger.logDebug('enter clone');
+    let clone: Frustum;
+    clone = new Frustum()
       .setFromFrustum(this);
+    this.logger.logDebug('exit clone');
+    return clone;
   }
 
   getPoints(): Vector3[] {
+    this.logger.logDebug('enter getPoints');
     let points: Vector3[];
     points = [
       this.nearTopLeftPoint,
@@ -320,10 +330,12 @@ export class Frustum {
       this.farBottomLeftPoint,
       this.farBottomRightPoint
     ];
+    this.logger.logDebug('exit getPoints');
     return points;
   }
 
   getPlanes(): Plane[] {
+    this.logger.logDebug('enter getPlanes');
     let planes: Plane[];
     planes = [
       this.leftPlane,
@@ -333,6 +345,7 @@ export class Frustum {
       this.nearPlane,
       this.farPlane
     ];
+    this.logger.logDebug('exit getPlanes');
     return planes;
   }
 

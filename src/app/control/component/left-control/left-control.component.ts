@@ -2,64 +2,85 @@ import {
   Component, EventEmitter, Output
 } from '@angular/core';
 
+import { LoggingService } from '../../../core/service/logging.service';
+import { Logger } from '../../../core/model/logger';
+
 @Component({
   selector: 'left-control',
   templateUrl: './left-control.component.html',
   styleUrls: ['./left-control.component.css']
 })
 export class LeftControlComponent {
+  logger: Logger = LoggingService.getLogger('LeftControlComponent');
+
   @Output() onControlPressed: EventEmitter<string>;
   width: number;
   height: number;
 
   constructor() {
-    console.log('LeftControlComponent enter constructor');
+    this.logger.logDebug('enter constructor');
     this.onControlPressed = new EventEmitter<string>();
-    console.log('LeftControlComponent exit constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   resize(
     width: number,
     height: number
   ): void {
-    console.log('LeftControlComponent enter resize');
+    this.logger.logDebug('enter resize');
     if(width <= 0) {
-      console.log('error: width must be positive');
+      this.logger.logError('width must be positive');
+      this.logger.logDebug('exit resize');
       return;
     }
     if(height <= 0) {
-      console.log('error: height must be positive');
+      this.logger.logError('height must be positive');
+      this.logger.logDebug('exit resize');
       return;
     }
     this.width = width;
+    this.logger.logVerbose('width: ' + this.width);
     this.height = height;
-    console.log('LeftControlComponent exit resize');
+    this.logger.logVerbose('height: ' + this.height);
+    this.logger.logDebug('exit resize');
   }
 
   turnLeft(): void {
-    console.log('turn left pressed');
+    this.logger.logDebug('enter turnLeft');
+    this.logger.logVerbose('turn left pressed');
     this.onControlPressed.emit('turn left');
+    this.logger.logDebug('exit turnLeft');
   }
 
   targetLeft(): void {
-    console.log('target left pressed');
+    this.logger.logDebug('enter targetLeft');
+    this.logger.logVerbose('target left pressed');
     this.onControlPressed.emit('target left');
+    this.logger.logDebug('exit targetLeft');
   }
 
   moveForward(): void {
-    console.log('move forward pressed');
+    this.logger.logDebug('enter moveForward');
+    this.logger.logVerbose('move forward pressed');
     this.onControlPressed.emit('move forward');
+    this.logger.logDebug('exit moveForward');
   }
   moveLeft(): void {
-    console.log('move left pressed');
+    this.logger.logDebug('enter moveLeft');
+    this.logger.logVerbose('move left pressed');
     this.onControlPressed.emit('move left');
+    this.logger.logDebug('exit moveLeft');
   }
   moveRight(): void {
-    console.log('move right pressed');
+    this.logger.logDebug('enter moveRight');
+    this.logger.logVerbose('move right pressed');
     this.onControlPressed.emit('move right');
+    this.logger.logDebug('exit moveRight');
   }
   moveBackward(): void {
-    console.log('move back pressed');
+    this.logger.logDebug('enter moveBackward');
+    this.logger.logVerbose('move back pressed');
     this.onControlPressed.emit('move back');
+    this.logger.logDebug('exit moveBackward');
   }
 }

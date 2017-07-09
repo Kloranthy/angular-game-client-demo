@@ -1,22 +1,27 @@
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 export class Entity {
+  logger: Logger = LoggingService.getLogger('Entity');
+
   entityId: string;
 
   constructor() {
-    //console.log('Entity enter constructor');
-    //console.log('Entity exit constructor');
+    this.logger.logDebug('enter constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   getEntityId(): string {
-    console.log('Entity enter getEntityId');
-    console.log('entityId: ' + this.entityId);
-    console.log('Entity exit getEntityId');
+    this.logger.logDebug('enter getEntityId');
+    this.logger.logVerbose('entityId: ' + this.entityId);
+    this.logger.logDebug('exit getEntityId');
     return this.entityId;
   }
 
   setEntityId(entityId: string): void {
-    console.log('Entity enter setEntityId');
+    this.logger.logDebug('enter setEntityId');
     this.entityId = entityId;
-    console.log('entityId: ' + this.entityId);
-    console.log('Entity exit setEntityId');
+    this.logger.logVerbose('entityId: ' + this.entityId);
+    this.logger.logDebug('exit setEntityId');
   }
 }

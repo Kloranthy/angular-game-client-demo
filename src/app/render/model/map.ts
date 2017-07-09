@@ -1,4 +1,5 @@
 import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
 
 import { Camera } from './camera';
 import { Frustum } from './frustum';
@@ -7,7 +8,7 @@ import { Vector3 } from './vector3';
 import { Wall } from './wall';
 
 export class Map {
-  loggingService: LoggingService;
+  logger: Logger =  LoggingService.getLogger('Map');
   tiles: Tile[][];
   width: number;
   length: number;
@@ -19,7 +20,7 @@ export class Map {
 
   constructor(
   ) {
-    this.loggingService.logDebug('Map','enter constructor');
+    this.logger.logDebug('enter constructor');
     this.xDirection = new Vector3();
     this.xDirection.setFromValues(
       1, 0, 0
@@ -37,11 +38,11 @@ export class Map {
 
     this.width = 64;
     this.length = 64;
-    this.loggingService.logDebug('Map','exit constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   hardCodedDemo(): void {
-    this.loggingService.logDebug('Map','enter hardCodedDemo');
+    this.logger.logDebug('enter hardCodedDemo');
     this.tiles = new Array<Array<Tile>>();
     for(
       let ix: number = 0;
@@ -61,21 +62,21 @@ export class Map {
           ix == 0 || ix == this.width - 1
           || iy == 0 || iy == this.length - 1
         ) {
-          //this.loggingService.logVerbose('Map','tile is on edge of map');
+          //this.logger.logVerbose('tile is on edge of map');
           const wall: Wall = new Wall();
           //wall.setWallId('w' + ix + iy);
           tile.wall = wall;
         }
         else {
-          //this.loggingService.logVerbose('Map','tile is not on edge of map');
+          //this.logger.logVerbose('tile is not on edge of map');
         }
       }
     }
-    this.loggingService.logDebug('Map','exit hardCodedDemo');
+    this.logger.logDebug('exit hardCodedDemo');
   }
 
   placeCameraHardCodedDemo(camera: Camera): void {
-    this.loggingService.logDebug('Map','enter placeCameraHardCodedDemo');
+    this.logger.logDebug('enter placeCameraHardCodedDemo');
     let cameraPosition: Vector3;
     let viewPortDistance: number;
     let viewPortCenterPosition: Vector3;
@@ -97,11 +98,11 @@ export class Map {
     camera.setViewPortCenterPosition(viewPortCenterPosition);
 
     camera.calculateViewFrustum();
-    this.loggingService.logDebug('Map','exit placeCameraHardCodedDemo');
+    this.logger.logDebug('exit placeCameraHardCodedDemo');
   }
 
   generate(): void {
-    this.loggingService.logDebug('Map','enter generate');
+    this.logger.logDebug('enter generate');
     this.tiles = new Array<Array<Tile>>();
     for(
       let ix: number = 0;
@@ -121,15 +122,15 @@ export class Map {
           ix == 0 || ix == this.width - 1
           || iy == 0 || iy == this.length - 1
         ) {
-          this.loggingService.logVerbose('Map','tile is on edge of map');
+          this.logger.logVerbose('tile is on edge of map');
           const wall: Wall = new Wall();
           //wall.setWallId('w' + ix + iy);
           tile.wall = wall;
         }
         else {
-          this.loggingService.logVerbose('Map','tile is not on edge of map');
+          this.logger.logVerbose('tile is not on edge of map');
           if(Math.random() > 0.8) {
-            this.loggingService.logVerbose('Map','tile gets a wall anyways');
+            this.logger.logVerbose('tile gets a wall anyways');
             const wall: Wall = new Wall();
             //wall.setWallId('w' + ix + iy);
             tile.wall = wall;
@@ -138,11 +139,11 @@ export class Map {
       }
     }
     this.printMap();
-    this.loggingService.logDebug('Map','exit generate');
+    this.logger.logDebug('exit generate');
   }
 
   printMap(): void {
-    this.loggingService.logDebug('Map','enter printMap');
+    this.logger.logDebug('enter printMap');
     for(
       let iy: number = 0;
       iy < this.length;
@@ -161,9 +162,9 @@ export class Map {
           line = line + ' ';
         }
       }
-      this.loggingService.logVerbose('Map',line);
+      this.logger.logVerbose(line);
     }
-    this.loggingService.logDebug('Map','exit printMap');
+    this.logger.logDebug('exit printMap');
   }
 
   getTileAt(
@@ -186,10 +187,10 @@ export class Map {
       ) {
         const tile: Tile = this.tiles[ix][iy];
         if (tile.wall) {
-          this.loggingService.logVerbose('Map','tile occupied by wall');
+          this.logger.logVerbose('tile occupied by wall');
         }
         else {
-          this.loggingService.logVerbose('Map','found an empty tile');
+          this.logger.logVerbose('found an empty tile');
           return tile;
         }
       }
@@ -212,63 +213,63 @@ export class Map {
         iy++
       ) {
         if(x + ix >= this.width) {
-          this.loggingService.logVerbose('Map','x out of bounds');
+          this.logger.logVerbose('x out of bounds');
         }
         else {
           if(y + iy >= this.width) {
-            this.loggingService.logVerbose('Map','y out of bounds');
+            this.logger.logVerbose('y out of bounds');
           }
           else {
             const tile: Tile = this.tiles[x + ix][y + iy];
             if (tile.wall) {
-              this.loggingService.logVerbose('Map','tile occupied by wall');
+              this.logger.logVerbose('tile occupied by wall');
             }
             else {
-              this.loggingService.logVerbose('Map','found an empty tile');
+              this.logger.logVerbose('found an empty tile');
               return tile;
             }
           }
           if(y - iy < 0) {
-            this.loggingService.logVerbose('Map','y out of bounds');
+            this.logger.logVerbose('y out of bounds');
           }
           else {
             const tile: Tile = this.tiles[x + ix][y - iy];
             if (tile.wall) {
-              this.loggingService.logVerbose('Map','tile occupied by wall');
+              this.logger.logVerbose('tile occupied by wall');
             }
             else {
-              this.loggingService.logVerbose('Map','found an empty tile');
+              this.logger.logVerbose('found an empty tile');
               return tile;
             }
           }
         }
         if(x - ix < 0) {
-          this.loggingService.logVerbose('Map','x out of bounds');
+          this.logger.logVerbose('x out of bounds');
         }
         else {
           if(y + iy >= this.width) {
-            this.loggingService.logVerbose('Map','y out of bounds');
+            this.logger.logVerbose('y out of bounds');
           }
           else {
             const tile: Tile = this.tiles[x - ix][y + iy];
             if (tile.wall) {
-              this.loggingService.logVerbose('Map','tile occupied by wall');
+              this.logger.logVerbose('tile occupied by wall');
             }
             else {
-              this.loggingService.logVerbose('Map','found an empty tile');
+              this.logger.logVerbose('found an empty tile');
               return tile;
             }
           }
           if(y - iy < 0) {
-            this.loggingService.logVerbose('Map','y out of bounds');
+            this.logger.logVerbose('y out of bounds');
           }
           else {
             const tile: Tile = this.tiles[x - ix][y - iy];
             if (tile.wall) {
-              this.loggingService.logVerbose('Map','tile occupied by wall');
+              this.logger.logVerbose('tile occupied by wall');
             }
             else {
-              this.loggingService.logVerbose('Map','found an empty tile');
+              this.logger.logVerbose('found an empty tile');
               return tile;
             }
           }
@@ -299,24 +300,24 @@ export class Map {
         return a.y - b.y;
       }
     );
-    this.loggingService.logVerbose('Map','minX: ' + minX);
-    this.loggingService.logVerbose('Map','maxX: ' + maxX);
-    this.loggingService.logVerbose('Map','minY: ' + minY);
-    this.loggingService.logVerbose('Map','maxY: ' + maxY);
+    this.logger.logVerbose('minX: ' + minX);
+    this.logger.logVerbose('maxX: ' + maxX);
+    this.logger.logVerbose('minY: ' + minY);
+    this.logger.logVerbose('maxY: ' + maxY);
     if(minX < 0) {
-      this.loggingService.logError('Map','minX value out of bounds');
+      this.logger.logError('minX value out of bounds');
       minX = 0;
     }
     if(maxX >= this.width) {
-      this.loggingService.logError('Map','maxX value out of bounds');
+      this.logger.logError('maxX value out of bounds');
       maxX = this.width - 1;
     }
     if(minY < 0) {
-      this.loggingService.logError('Map','minY value out of bounds');
+      this.logger.logError('minY value out of bounds');
       minY = 0;
     }
     if(maxY >= this.length) {
-      this.loggingService.logError('Map','maxX value out of bounds');
+      this.logger.logError('maxX value out of bounds');
       maxY = this.length - 1;
     }
     for(
@@ -353,8 +354,10 @@ export class Map {
     tilePosition: Vector3,
     frustum: Frustum
   ): boolean {
+    this.logger.logDebug('enter tileIntersectsFrustum');
     // start by checking if the tile center is in the frustum
     if(frustum.containsPoint(tilePosition)) {
+      this.logger.logDebug('exit tileIntersectsFrustum');
       return true;
     }
     let point: Vector3;
@@ -381,10 +384,12 @@ export class Map {
         if(
           frustum.containsPoint(point)
         ) {
+          this.logger.logDebug('exit tileIntersectsFrustum');
           return true;
         }
       }
     }
+    this.logger.logDebug('exit tileIntersectsFrustum');
     return false;
   }
 }
