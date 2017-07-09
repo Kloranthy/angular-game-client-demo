@@ -1,10 +1,15 @@
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 import { CanvasComponent } from '../component/canvas/canvas.component';
 
 import { Map } from './map';
-import { Vector2 } from './vector2';
+import { Frustum } from './frustum';
 import { Vector3 } from './vector3';
 
 export class Camera {
+  logger: Logger = LoggingService.getLogger('Camera');
+
   map: Map; // the map the camera is located in
 
   viewPortCenterPosition: Vector3; // the position of the center of the view port in world coordinates
@@ -21,6 +26,8 @@ export class Camera {
   // todo have viewPortDistance calculated by fov and viewPortWidth
   viewPortDistance: number; // the distance from the camera to the view port center
   visibleDistance: number; // the distance drawn beyond the view port
+
+  viewFrustum: Frustum;
 
   resolution: number; // converts from view port units to pixels on buffer canvas
 
@@ -234,317 +241,9 @@ export class Camera {
     return rightDirection;
   }
 
-  // shitty name
-  calculateVisibleTrapezoid(): void {
-    console.log('Camera enter calculateVisibleTrapezoid');
-    // just for this demo I'm going to set the view port and camera positions
-    let cameraPosition = new Vector2();
-    cameraPosition.x = 0;
-    cameraPosition.y = 0;
-    let viewPortCenterPosition = new Vector2();
-    viewPortCenterPosition.x = 0;
-    viewPortCenterPosition.y = 8;
-    console.log(
-      'cameraPosition ('
-      + this.cameraPosition.x + ', '
-      + this.cameraPosition.y + ')'
-    );
-    console.log(
-      'viewPortCenterPosition ('
-      + this.viewPortCenterPosition.x + ', '
-      + this.viewPortCenterPosition.y + ')'
-    );
-    //
-    let cameraDirection: Vector2; // the direction the camera is facing
-    let leftDirection: Vector2; // perpendicular to the camera direction
-    let rightDirection: Vector2; // perpendicular to the camera direction
-    let nearLeftPoint: Vector2; // the nearest visible point on the left edge
-    let nearRightPoint: Vector2; // the nearest visible point on the right edge
-    let farLeftPoint: Vector2; // the farthest visible point on the left edge
-    let farRightPoint: Vector2; // the farthest visible point on the right edge
-
-    // start by getting the direction the camera is facing
-    cameraDirection = new Vector2();
-    cameraDirection.x = (this.viewPortCenterPosition.x - this.cameraPosition.x)
-      / this.viewPortDistance;
-    cameraDirection.y = (this.viewPortCenterPosition.y - this.cameraPosition.y)
-      / this.viewPortDistance;
-    console.log(
-      'cameraDirection ('
-      + cameraDirection.x + ', '
-      + cameraDirection.y + ')'
-    );
-
-    // the view port extends out perpendicular from this direction
-    // todo add matrix stuff
-    // rotating 90 degrees counter-clockwise
-    // x' = x * cos(90) - y * sin(90)
-    // y' = x * sin(90) + y * cos(90)
-    leftDirection = new Vector2();
-    leftDirection.x = cameraDirection.x * 0 - cameraDirection.y * 1;
-    leftDirection.y = cameraDirection.x * 1 - cameraDirection.y * 0;
-    console.log(
-      'leftDirection ('
-      + leftDirection.x + ', '
-      + leftDirection.y + ')'
-    );
-    // rotating 90 degrees clockwise
-    // x' = x * cos(-90) - y * sin(-90)
-    // y' = x * sin(-90) + y * cos(-90)
-    rightDirection = new Vector2();
-    rightDirection.x = cameraDirection.x * 0 - cameraDirection.y * -1;
-    rightDirection.y = cameraDirection.x * -1 - cameraDirection.y * 0;
-    console.log(
-      'rightDirection ('
-      + rightDirection.x + ', '
-      + rightDirection.y + ')'
-    );
-
-    // now use the left and right directions to find the near points of the left and right edges
-    // note: both x and y use width as magnitude because height will be z
-    nearLeftPoint = new Vector2();
-    nearLeftPoint.x = this.viewPortCenterPosition.x
-      + leftDirection.x * this.viewPortWidth / 2;
-    nearLeftPoint.y = this.viewPortCenterPosition.y
-      + leftDirection.y * this.viewPortWidth / 2;
-    console.log(
-      'nearLeftPoint ('
-      + nearLeftPoint.x + ', '
-      + nearLeftPoint.y + ')'
-    );
-
-    nearRightPoint = new Vector2();
-    nearRightPoint.x = this.viewPortCenterPosition.x
-      + rightDirection.x * this.viewPortWidth / 2;
-    nearRightPoint.y = this.viewPortCenterPosition.y
-      + rightDirection.y * this.viewPortWidth / 2;
-    console.log(
-      'nearRightPoint ('
-      + nearRightPoint.x + ', '
-      + nearRightPoint.y + ')'
-    );
-
-    // method 2 - rays out from ray out of view port center
-    let farCenterPoint: Vector2; // the center of the far view plane
-    let scaledViewPortWidth: number; // the view port width scaled to max distance
-    // start by projecting a ray out from the view port center using the camera direction and visible distance
-    farCenterPoint = new Vector2();
-    farCenterPoint.x = this.viewPortCenterPosition.x
-      + cameraDirection.x * this.visibleDistance;
-    farCenterPoint.y = this.viewPortCenterPosition.y
-      + cameraDirection.y * this.visibleDistance;
-
-    // now scale the view port width
-    scaledViewPortWidth = this.viewPortWidth / this.viewPortDistance
-      * (this.viewPortDistance + this.visibleDistance);
-
-    farLeftPoint = new Vector2();
-    farLeftPoint.x = farCenterPoint.x
-      + leftDirection.x * scaledViewPortWidth;
-    farLeftPoint.y = farCenterPoint.y
-      + leftDirection.y * scaledViewPortWidth;
-    console.log(
-      'farLeftPoint ('
-      + farLeftPoint.x + ', '
-      + farLeftPoint.y + ')'
-    );
-    farRightPoint = new Vector2();
-    farRightPoint.x = farCenterPoint.x
-      + rightDirection.x * scaledViewPortWidth;
-    farRightPoint.y = farCenterPoint.y
-      + rightDirection.y * scaledViewPortWidth;
-    console.log(
-      'farRightPoint ('
-      + farRightPoint.x + ', '
-      + farRightPoint.y + ')'
-    );
-    console.log('Camera exit calculateVisibleTrapezoid');
-  }
-
   calculateViewFrustum(): void {
     console.log('Camera enter calculateViewFrustum');
-    // just for this demo I'm going to set the view port and camera positions
-    this.cameraPosition = new Vector3();
-    this.cameraPosition.setFromValues(
-      0, 0, 2
-    );
-    console.log(
-      'cameraPosition ('
-      + this.cameraPosition.x + ', '
-      + this.cameraPosition.y + ', '
-      + this.cameraPosition.z + ')'
-    );
-
-    this.viewPortCenterPosition = new Vector3();
-    this.viewPortCenterPosition.x = Math.sqrt(8);
-    this.viewPortCenterPosition.y = Math.sqrt(8);
-    this.viewPortCenterPosition.z = 2;
-    console.log(
-      'viewPortCenterPosition ('
-      + this.viewPortCenterPosition.x + ', '
-      + this.viewPortCenterPosition.y + ', '
-      + this.viewPortCenterPosition.z + ')'
-    );
-    //
-    let cameraDirection: Vector3;
-    let upDirection: Vector3;
-    let downDirection: Vector3;
-    let leftDirection: Vector3;
-    let rightDirection: Vector3;
-    let nearTopLeftPoint: Vector3;
-    let nearTopRightPoint: Vector3;
-    let nearBottomLeftPoint: Vector3;
-    let nearBottomRightPoint: Vector3;
-    let farTopLeftPoint: Vector3;
-    let farTopRightPoint: Vector3;
-    let farBottomLeftPoint: Vector3;
-    let farBottomRightPoint: Vector3;
-
-    // start by calculating the camera direction
-    cameraDirection = this.calculateCameraDirection();
-
-    // use the camera direction to calculate the 4 perpendicular directions
-    upDirection = this.calculateUpDirection(cameraDirection);
-    downDirection = this.calculateDownDirection(cameraDirection);
-    leftDirection = this.calculateLeftDirection(cameraDirection);
-    rightDirection = this.calculateRightDirection(cameraDirection);
-
-    // use these directions and the view port dimensions to find the near points
-    let nearLeftMovement: Vector3;
-    let nearRightMovement: Vector3;
-    let nearTopMovement: Vector3;
-    let nearBottomMovement: Vector3;
-    nearLeftMovement = leftDirection.clone()
-      .scale(this.viewPortWidth / 2);
-    nearRightMovement = rightDirection.clone()
-      .scale(this.viewPortWidth / 2);
-    nearTopMovement = upDirection.clone()
-      .scale(this.viewPortHeight / 2);
-    nearBottomMovement = downDirection.clone()
-      .scale(this.viewPortHeight / 2);
-
-    nearTopLeftPoint = this.viewPortCenterPosition.clone()
-      .addVector(nearLeftMovement)
-      .addVector(nearTopMovement);
-    console.log(
-      'nearTopLeftPoint ('
-      + nearTopLeftPoint.x + ', '
-      + nearTopLeftPoint.y + ', '
-      + nearTopLeftPoint.z + ')'
-    );
-
-    nearTopRightPoint = this.viewPortCenterPosition.clone()
-      .addVector(nearLeftMovement)
-      .addVector(nearTopMovement);
-    console.log(
-      'nearTopRightPoint ('
-      + nearTopRightPoint.x + ', '
-      + nearTopRightPoint.y + ', '
-      + nearTopRightPoint.z + ')'
-    );
-
-    nearBottomLeftPoint = this.viewPortCenterPosition.clone()
-      .addVector(nearLeftMovement)
-      .addVector(nearBottomMovement);
-    console.log(
-      'nearBottomLeftPoint ('
-      + nearBottomLeftPoint.x + ', '
-      + nearBottomLeftPoint.y + ', '
-      + nearBottomLeftPoint.z + ')'
-    );
-
-    nearBottomRightPoint = this.viewPortCenterPosition.clone()
-      .addVector(nearRightMovement)
-      .addVector(nearBottomMovement);
-    console.log(
-      'nearBottomRightPoint ('
-      + nearBottomRightPoint.x + ', '
-      + nearBottomRightPoint.y + ', '
-      + nearBottomRightPoint.z + ')'
-    );
-
-    // now extend out from the view port center
-    let farMovement: Vector3;
-    let farViewCenter: Vector3;
-
-    farMovement = cameraDirection.clone()
-      .scale(this.visibleDistance);
-
-    farViewCenter = this.viewPortCenterPosition.clone()
-      .addVector(farMovement);
-    console.log(
-      'farViewCenter ('
-      + farViewCenter.x + ', '
-      + farViewCenter.y + ', '
-      + farViewCenter.z + ')'
-    );
-
-    // now scale the view port dimensions
-    let scaledViewPortWidth: number;
-    let scaledViewPortHeight: number;
-    scaledViewPortWidth = this.viewPortWidth
-      / this.viewPortDistance
-      * (this.viewPortDistance + this.visibleDistance);
-    scaledViewPortHeight = this.viewPortHeight
-      / this.viewPortDistance
-      * (this.viewPortDistance + this.visibleDistance);
-
-    // now calculate the far direction movements
-    let farLeftMovement: Vector3;
-    let farRightMovement: Vector3;
-    let farTopMovement: Vector3;
-    let farBottomMovement: Vector3;
-
-    farLeftMovement = leftDirection.clone()
-      .scale(scaledViewPortWidth / 2);
-    farRightMovement = rightDirection.clone()
-      .scale(scaledViewPortWidth / 2);
-    farTopMovement = upDirection.clone()
-      .scale(scaledViewPortHeight / 2);
-    farBottomMovement = downDirection.clone()
-      .scale(scaledViewPortHeight / 2);
-
-    // now use these to find the far points
-    farTopLeftPoint = farViewCenter.clone()
-      .addVector(farLeftMovement)
-      .addVector(farTopMovement);
-    console.log(
-      'farTopLeftPoint ('
-      + farTopLeftPoint.x + ', '
-      + farTopLeftPoint.y + ', '
-      + farTopLeftPoint.z + ')'
-    );
-
-    farTopRightPoint = farViewCenter.clone()
-      .addVector(farRightMovement)
-      .addVector(farTopMovement);
-    console.log(
-      'farTopRightPoint ('
-      + farTopRightPoint.x + ', '
-      + farTopRightPoint.y + ', '
-      + farTopRightPoint.z + ')'
-    );
-
-    farBottomLeftPoint = farViewCenter.clone()
-      .addVector(farLeftMovement)
-      .addVector(farBottomMovement);
-    console.log(
-      'farBottomLeftPoint ('
-      + farBottomLeftPoint.x + ', '
-      + farBottomLeftPoint.y + ', '
-      + farBottomLeftPoint.z + ')'
-    );
-
-    farBottomRightPoint = farViewCenter.clone()
-      .addVector(farRightMovement)
-      .addVector(farBottomMovement);
-    console.log(
-      'farBottomRightPoint ('
-      + farBottomRightPoint.x + ', '
-      + farBottomRightPoint.y + ', '
-      + farBottomRightPoint.z + ')'
-    );
-
+    this.viewFrustum = new Frustum().calculate(this);
     console.log('Camera exit calculateViewFrustum');
   }
 
@@ -574,6 +273,9 @@ export class Camera {
     this.clearFrame();
     this.renderContext.fillStyle = '#00ff00';
     this.renderContext.strokeStyle = '#00ff00';
+    // todo ask map for all things inside of view frustum
+    // sort by distance from camera
+    // draw from furthest away to nearest
     //this.drawLines();
     //this.drawRects();
     if(this.canvasComponent) {

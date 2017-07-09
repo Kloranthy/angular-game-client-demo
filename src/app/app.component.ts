@@ -2,15 +2,16 @@ import {
   Component, ElementRef, AfterViewInit, ViewChild
 } from '@angular/core';
 
-import { CanvasComponent } from './render/component/canvas/canvas.component';
+import { LoggingService } from './core/service/logging.service';
+import { Logger } from './core/model/logger';
 
 import { LeftControlComponent } from './control/component/left-control/left-control.component';
 import { RightControlComponent } from './control/component/right-control/right-control.component';
-
 import { InputProcessorService } from './control/service/input-processor.service';
 
-import { Camera } from './render/model/camera';
+import { CanvasComponent } from './render/component/canvas/canvas.component';
 
+import { Camera } from './render/model/camera';
 import { Map } from './render/model/map';
 
 @Component({
@@ -42,18 +43,27 @@ export class AppComponent implements AfterViewInit {
   @ViewChild(CanvasComponent) canvas: CanvasComponent;
 
   constructor(
+    private loggingService: LoggingService,
     private inputProcessor: InputProcessorService
   ) {
-    console.log('AppComponent enter constructor');
-    console.log('AppComponent exit constructor');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter constructor'
+    );
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit constructor'
+    );
   }
 
   ngAfterViewInit(): void {
-    console.log('AppComponent enter ngAfterViewInit');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter ngAfterViewInit'
+    );
     // create the camera
     this.camera = new Camera();
     this.camera.setCanvasComponent(this.canvas);
-    //this.camera.calculateViewFrustum();
     // create the map
     this.map = new Map();
     this.map.hardCodedDemo();
@@ -62,40 +72,85 @@ export class AppComponent implements AfterViewInit {
     this.inputProcessor.setCamera(this.camera);
     this.inputProcessor.setMap(this.map);
     // resize the ui elements
-    this.calculateElementDimensions();
+    this.calculateElementDimensions()
     this.resizeElements();
     // todo add a periodic check for change in window dimensions
-    console.log('AppComponent exit ngAfterViewInit');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit ngAfterViewInit'
+    );
   }
 
   onControlPressed(input: string): void {
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter onControlPressed'
+    );
     this.inputProcessor.process(input);
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit onControlPressed'
+    );
   }
 
   renderTest():void {
-    console.log('AppComponent render test processed');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter renderTest'
+    );
     this.renderFrame();
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit renderTest'
+    );
   }
 
   renderFrame(): void {
-    console.log('AppComponent enter renderFrame');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter renderFrame'
+    );
     this.camera.renderFrame();
-    console.log('AppComponent exit renderFrame');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit renderFrame'
+    );
   }
 
   calculateElementDimensions() {
-    console.log('AppComponent enter calculateElementDimensions');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter calculateElementDimensions'
+    );
     this.windowWidth = window.innerWidth ;
     this.windowHeight = window.innerHeight;
     const windowAspectRatio = this.windowWidth / this.windowHeight;
-    console.log('windowWidth: ' + this.windowWidth);
-    console.log('windowHeight: ' + this.windowHeight);
-    console.log('windowAspectRatio: ' + windowAspectRatio);
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'windowWidth: ' + this.windowWidth
+    );
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'windowHeight: ' + this.windowHeight
+    );
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'windowAspectRatio: ' + windowAspectRatio
+    );
 
     if(windowAspectRatio > 1) {
-      console.log('landscape mode');
-      console.log('placing controls beside canvas');
-      console.log('removing 200 from window width for controls');
+      this.loggingService.logVerbose(
+        'AppComponent',
+        'landscape mode'
+      );
+      this.loggingService.logVerbose(
+        'AppComponent',
+        'placing controls beside canvas'
+      );
+      this.loggingService.logVerbose(
+        'AppComponent',
+        'removing 200 from window width for controls'
+      );
       this.canvasWidth = this.windowWidth - 200;
       this.canvasHeight = this.windowHeight;
 
@@ -103,8 +158,14 @@ export class AppComponent implements AfterViewInit {
       this.controlHeight = this.windowHeight;
     }
     else {
-      console.log('portrait mode');
-      console.log('placing controls below canvas');
+      this.loggingService.logVerbose(
+        'AppComponent',
+        'portrait mode'
+      );
+      this.loggingService.logVerbose(
+        'AppComponent',
+        'placing controls below canvas'
+      );
       // todo consider revising to have canvas height be based on viewport aspect ratio
       this.canvasWidth = this.windowWidth;
       this.canvasHeight = Math.floor(this.windowHeight / 2);
@@ -112,17 +173,34 @@ export class AppComponent implements AfterViewInit {
       this.controlWidth = Math.floor(this.windowWidth / 2);
       this.controlHeight = Math.floor(this.windowHeight / 2);
     }
-    console.log('canvasWidth: ' + this.canvasWidth);
-    console.log('canvasHeight: ' + this.canvasHeight);
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'canvasWidth: ' + this.canvasWidth
+    );
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'canvasHeight: ' + this.canvasHeight
+    );
 
-    console.log('controlWidth: ' + this.controlWidth);
-    console.log('controlHeight: ' + this.controlHeight);
-    this.resizeElements();
-    console.log('AppComponent exit calculateElementDimensions');
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'controlWidth: ' + this.controlWidth
+    );
+    this.loggingService.logVerbose(
+      'AppComponent',
+      'controlHeight: ' + this.controlHeight
+    );
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit calculateElementDimensions'
+    );
   }
 
   private resizeElements(): void {
-    console.log('AppComponent enter resizeElements');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'enter resizeElements'
+    );
     setTimeout(
       () => this.leftControl.resize(
         this.controlWidth,
@@ -148,7 +226,10 @@ export class AppComponent implements AfterViewInit {
       ),
       0
     );
-    console.log('AppComponent exit resizeElements');
+    this.loggingService.logDebug(
+      'AppComponent',
+      'exit resizeElements'
+    );
   }
 
 
