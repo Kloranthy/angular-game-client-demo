@@ -28,7 +28,6 @@ export class AppComponent implements AfterViewInit {
 
   map: Map; // todo description
 
-  minControlWidth: number; // the minimum width of the control containers
   controlWidth: number;
   controlHeight: number;
 

@@ -13,11 +13,37 @@ export class LoggingService {
 
   currentLogLevel: number;
 
+  showTimeStamp: boolean;
+
+  blackListedSources: string[];
+
   static instance: LoggingService;
 
   constructor() {
-    this.currentLogLevel = 3;
-    LoggingService.instance = this;
+    if(LoggingService.instance) {
+      console.log('instance already exists');
+      return null;
+    }
+    this.currentLogLevel = 1;
+    this.showTimeStamp = false;
+    this.blackListedSources = [];
+    this.blackListSource('Tile');
+    this.blackListSource('Vector3');
+    this.blackListSource('Entity');
+    this.blackListSource('Wall');
+  }
+
+  static getLogger(source: string): Logger {
+    return new Logger(source);
+  }
+
+  static getInstance() {
+    // todo learn how to do proper singletons in typescript
+    //console.log('getInstance called');
+    if(!LoggingService.instance) {
+      LoggingService.instance = new LoggingService();
+    }
+    return LoggingService.instance;
   }
 
   logDebug(
@@ -75,24 +101,30 @@ export class LoggingService {
     );
   }
 
+  blackListSource(source: string): void {
+    if(this.blackListedSources.includes(source)) {
+      return;
+    }
+    this.blackListedSources.push(source);
+  }
+
   private log(
     level: number,
     source: string,
     message: string
   ): void {
-    if(level >= this.currentLogLevel) {
-      console.log(
-        Date.now() + ' '
-        + source + ' '
-        + message
-      );
+    if(level < this.currentLogLevel) {
+      return;
     }
-  }
-
-  static getLogger(source: string): Logger {
-    return new Logger(
-      source,
-      LoggingService.instance
-    );
+    if(this.blackListedSources.includes(source)) {
+      return;
+    }
+    let out: string;
+    out = '';
+    if(this.showTimeStamp) {
+      out = out + Date.now().toString() + ' ';
+    }
+    out = out + source + ' ' + message;
+    console.log(out);
   }
 }

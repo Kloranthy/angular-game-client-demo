@@ -1,57 +1,81 @@
 import { LoggingService } from '../service/logging.service';
 
 export class Logger {
+  loggingService: LoggingService;
   source: string;
 
-  constructor(
-    source: string,
-    private loggingService: LoggingService
-  ) {
+  constructor(source: string) {
     this.source = source;
+    this.loggingService = LoggingService.getInstance();
   }
 
   logDebug(
     message: string
   ): void {
-    this.loggingService.logDebug(
-      this.source,
-      message
-    );
+    if(!this.loggingService) {
+      this.loggingService = LoggingService.getInstance();
+    }
+    if(this.loggingService) {
+      this.loggingService.logDebug(
+        this.source,
+        message
+      );
+    }
   }
 
   logVerbose(
     message: string
   ): void {
-    this.loggingService.logVerbose(
-      this.source,
-      message
-    );
+    if(!this.loggingService) {
+      this.loggingService = LoggingService.getInstance();
+    }
+    if(this.loggingService) {
+      this.loggingService.logVerbose(
+        this.source,
+        message
+      );
+    }
   }
 
   logInfo(
     message: string
   ): void {
-    this.loggingService.logInfo(
-      this.source,
-      message
-    );
+    if(!this.loggingService) {
+      this.loggingService = LoggingService.getInstance();
+    }
+    if(this.loggingService) {
+      this.loggingService.logInfo(
+        this.source,
+        message
+      );
+    }
   }
 
   logWarning(
     message: string
   ): void {
-    this.loggingService.logWarning(
-      this.source,
-      message
-    );
+    if(!this.loggingService) {
+      this.loggingService = LoggingService.getInstance();
+    }
+    if(this.loggingService) {
+      this.loggingService.logWarning(
+        this.source,
+        message
+      );
+    }
   }
 
   logError(
     message: string
   ): void {
-    this.loggingService.logError(
-      this.source,
-      message
-    );
+    if(!this.loggingService) {
+      this.loggingService = LoggingService.getInstance();
+    }
+    if(this.loggingService) {
+      this.loggingService.logError(
+        this.source,
+        message
+      );
+    }
   }
 }
