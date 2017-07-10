@@ -1,28 +1,33 @@
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 import { Wall } from './wall';
 
 export class Tile {
+  logger: Logger = LoggingService.getLogger('Tile');
+
   tileId: string;
-  // todo have multiple sprites, retrieve based on view angle
+  // todo have multiple sprites, retrieve based on view angle?
   image: string;
   // todo proper entity-location interaction
   wall: Wall;
 
   constructor() {
-    //console.log('Tile enter constructor');
-    //console.log('Tile exit constructor');
+    this.logger.logDebug('enter constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   getTileId(): string {
-    console.log('Tile enter getTileId');
-    console.log('tileId: ' + this.tileId);
-    console.log('Tile exit getTileId');
+    this.logger.logDebug('enter getTileId');
+    this.logger.logVerbose('tileId: ' + this.tileId);
+    this.logger.logDebug('exit getTileId');
     return this.tileId;
   }
 
   setTileId(tileId: string): void {
-    console.log('Tile enter setTileId');
+    this.logger.logDebug('enter setTileId');
     this.tileId = tileId;
-    console.log('tileId: ' + this.tileId);
-    console.log('Tile exit getTileId');
+    this.logger.logVerbose('tileId: ' + this.tileId);
+    this.logger.logDebug('exit getTileId');
   }
 }

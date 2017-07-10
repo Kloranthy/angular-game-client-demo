@@ -1,54 +1,71 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 
+import { LoggingService } from '../../../core/service/logging.service';
+import { Logger } from '../../../core/model/logger';
+
 @Component({
   selector: 'right-control',
   templateUrl: './right-control.component.html',
   styleUrls: ['./right-control.component.css']
 })
 export class RightControlComponent {
+  logger: Logger = LoggingService.getLogger('RightControlComponent');
+
   @Output() onControlPressed;
   width: number;
   height: number;
 
   constructor() {
+    this.logger.logDebug('enter constructor');
     this.onControlPressed = new EventEmitter<string>();
+    this.logger.logDebug('exit constructor');
   }
 
   resize(
     width: number,
     height: number
   ): void {
-    console.log('RightControlComponent enter resize');
+    this.logger.logDebug('enter resize');
     if(width <= 0) {
-      console.log('error: width must be positive');
+      this.logger.logError('width must be positive');
       return;
     }
     if(height <= 0) {
-      console.log('error: height must be positive');
+      this.logger.logError('height must be positive');
       return;
     }
     this.width = width;
+    this.logger.logVerbose('width: ' + this.width);
     this.height = height;
-    console.log('RightControlComponent exit resize');
+    this.logger.logVerbose('height: ' + this.height);
+    this.logger.logDebug('exit resize');
   }
 
   turnRight(): void {
-    console.log('turn right pressed');
+    this.logger.logDebug('enter turnRight');
+    this.logger.logVerbose('turn right pressed');
     this.onControlPressed.emit('turn right');
+    this.logger.logDebug('exit turnRight');
   }
 
   targetRight(): void {
-    console.log('target right pressed');
+    this.logger.logDebug('enter targetRight');
+    this.logger.logVerbose('target right pressed');
     this.onControlPressed.emit('target right');
+    this.logger.logDebug('exit targetRight');
   }
 
   renderTest():void {
-    console.log('render test pressed');
+    this.logger.logDebug('enter renderTest');
+    this.logger.logVerbose('render test pressed');
     this.onControlPressed.emit('render test');
+    this.logger.logDebug('exit renderTest');
   }
 
   mapTest(): void {
-    console.log('map test pressed');
+    this.logger.logDebug('enter mapTest');
+    this.logger.logVerbose('map test pressed');
     this.onControlPressed.emit('map test');
+    this.logger.logDebug('exit mapTest');
   }
 }

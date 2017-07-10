@@ -2,6 +2,9 @@ import {
   Component, ViewChild, ElementRef, AfterViewInit
 } from '@angular/core';
 
+import { LoggingService } from '../../../core/service/logging.service';
+import { Logger } from '../../../core/model/logger';
+
 import { Camera } from '../../model/camera';
 
 @Component({
@@ -10,6 +13,8 @@ import { Camera } from '../../model/camera';
   styleUrls: ['./canvas.component.css']
 })
 export class CanvasComponent implements AfterViewInit {
+  logger: Logger = LoggingService.getLogger('CanvasComponent');
+
   viewPortAspectRatio: number; // the width of the view port
 
   canvasWidth: number; // the width of the canvas
@@ -20,15 +25,15 @@ export class CanvasComponent implements AfterViewInit {
   renderContext: CanvasRenderingContext2D;
 
   constructor() {
-    console.log('CanvasComponent enter constructor');
-    console.log('CanvasComponent exit constructor');
+    this.logger.logDebug('enter constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   ngAfterViewInit(): void {
-    console.log('CanvasComponent enter ngAfterViewInit');
+    this.logger.logDebug('enter ngAfterViewInit');
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
     this.renderContext = canvasElement.getContext('2d');
-    console.log('CanvasComponent exit ngAfterViewInit');
+    this.logger.logDebug('exit ngAfterViewInit');
   }
 
 
@@ -36,35 +41,35 @@ export class CanvasComponent implements AfterViewInit {
     width: number,
     height: number
   ): void {
-    console.log('CanvasComponent enter resize');
-    console.log('width: ' + width);
-    console.log('height: ' + height);
+    this.logger.logDebug('enter resize');
+    this.logger.logVerbose('width: ' + width);
+    this.logger.logVerbose('height: ' + height);
     if(width <= 0) {
-      console.log('error: canvas width must be positive');
+      this.logger.logError('canvas width must be positive');
       return;
     }
     else if(height <= 0) {
-      console.log('error: canvas height must be positive');
+      this.logger.logError('canvas height must be positive');
       return;
     }
     if(this.viewPortAspectRatio) {
-      console.log('making canvas conform to view port aspect ratio');
+      this.logger.logVerbose('making canvas conform to view port aspect ratio');
       if(width / height > this.viewPortAspectRatio) {
-        console.log('values wider than view port aspect ratio');
-        console.log('using height multiplied by view port aspect ratio for canvas width');
+        this.logger.logVerbose('values wider than view port aspect ratio');
+        this.logger.logVerbose('using height multiplied by view port aspect ratio for canvas width');
         this.canvasWidth = height * this.viewPortAspectRatio;
         this.canvasHeight = height;
       }
       else {
-        console.log('values taller than view port aspect ratio');
-        console.log('using width divided by view port aspect ratio for canvas height');
+        this.logger.logVerbose('values taller than view port aspect ratio');
+        this.logger.logVerbose('using width divided by view port aspect ratio for canvas height');
         this.canvasWidth = width;
         this.canvasHeight = width / this.viewPortAspectRatio;
       }
     }
     else {
-      console.log('error: viewPortAspectRatio undefined');
-      console.log('using values without adjustment');
+      this.logger.logWarning('viewPortAspectRatio undefined');
+      this.logger.logVerbose('using values without adjustment');
       this.canvasWidth = width;
       this.canvasHeight = height;
     }
@@ -72,12 +77,12 @@ export class CanvasComponent implements AfterViewInit {
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
     canvasElement.width = this.canvasWidth;
     canvasElement.height = this.canvasHeight;
-    console.log('canvas resized');
-    console.log('CanvasComponent exit resizeCanvas');
+    this.logger.logVerbose('canvas resized');
+    this.logger.logDebug('exit resizeCanvas');
   }
 
   drawFrame(canvas: HTMLCanvasElement): void {
-    console.log('CanvasComponent enter renderFrame');
+    this.logger.logDebug('enter renderFrame');
     // is clearing the frame necessary?
     this.clearFrame();
     this.renderContext.drawImage(
@@ -87,17 +92,17 @@ export class CanvasComponent implements AfterViewInit {
       this.canvasWidth,
       this.canvasHeight
     );
-    console.log('CanvasComponent exit renderFrame');
+    this.logger.logDebug('exit renderFrame');
   }
 
 
   private clearFrame(): void {
-    console.log('CanvasComponent enter clearFrame');
+    this.logger.logDebug('enter clearFrame');
     this.renderContext.fillStyle = '#000000';
     this.renderContext.fillRect(
       0, 0,
       this.canvasWidth, this.canvasHeight
     );
-    console.log('CanvasComponent exit clearFrame');
+    this.logger.logDebug('exit clearFrame');
   }
 }

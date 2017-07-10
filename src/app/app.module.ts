@@ -1,9 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
-import { AppComponent } from './app.component';
+import { CoreModule } from './core/core.module';
 import { RenderModule } from './render/render.module';
 import { ControlModule } from './control/control.module';
+
+import { AppComponent } from './app.component';
 
 @NgModule({
   declarations: [
@@ -12,9 +14,11 @@ import { ControlModule } from './control/control.module';
   imports: [
     BrowserModule,
     RenderModule,
-    ControlModule
+    ControlModule,
+    CoreModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [ AppComponent ]
 })
-export class AppModule { }
+export class AppModule {
+}

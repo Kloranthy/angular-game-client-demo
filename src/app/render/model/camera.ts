@@ -1,27 +1,35 @@
+import { LoggingService } from '../../core/service/logging.service';
+import { Logger } from '../../core/model/logger';
+
 import { CanvasComponent } from '../component/canvas/canvas.component';
 
 import { Map } from './map';
-import { Vector2 } from './vector2';
+import { Frustum } from './frustum';
+import { Vector3 } from './vector3';
 
 export class Camera {
+  logger: Logger = LoggingService.getLogger('Camera');
+
   map: Map; // the map the camera is located in
 
-  viewPortCenterPosition: Vector2; // the position of the center of the view port in world coordinates
-  cameraPosition: Vector2; // the position of the camera in world coordinates
+  viewPortCenterPosition: Vector3; // the position of the center of the view port in world coordinates
+  cameraPosition: Vector3; // the position of the camera in world coordinates
 
   viewPortWidth: number; // the width of the view port
   viewPortHeight: number; // the height of the view port
   viewPortAspectRatio: number; // the aspect ratio of the view port
 
   // fov not currently used
-  horizontalFieldOfView: number; // angle in degrees
-  verticalFieldOfView: number; // angle in degrees
+  horizontalFieldOfView: number; // visible angle in degrees
+  verticalFieldOfView: number; // visible angle in degrees
 
   // todo have viewPortDistance calculated by fov and viewPortWidth
   viewPortDistance: number; // the distance from the camera to the view port center
   visibleDistance: number; // the distance drawn beyond the view port
 
-  resolution: number; // number of rays to send out per degree
+  viewFrustum: Frustum;
+
+  resolution: number; // converts from view port units to pixels on buffer canvas
 
   bufferCanvas: HTMLCanvasElement; // canvas used for rendering frame
   bufferCanvasWidth: number; // the width of the buffer canvas
@@ -32,12 +40,13 @@ export class Camera {
   canvasComponent: CanvasComponent; // component that displays rendered frames
 
   constructor() {
-    console.log('Camera enter constructor');
+    this.logger.logDebug('enter constructor');
     this.viewPortWidth = 5;
     this.viewPortHeight = 3;
     this.viewPortAspectRatio = this.viewPortWidth / this.viewPortHeight;
 
-    // todo have this calculated using fov
+    // todo have this calculated using fov?
+    // or use this to calculate fov?
     this.viewPortDistance = 8;
 
     this.visibleDistance = 25;
@@ -52,281 +61,252 @@ export class Camera {
     this.bufferCanvas.height = this.bufferCanvasHeight;
 
     this.renderContext = this.bufferCanvas.getContext('2d');
-    console.log('Camera exit constructor');
+    this.logger.logDebug('exit constructor');
   }
 
   setCanvasComponent(canvasComponent: CanvasComponent): void {
+    this.logger.logDebug('enter setCanvasComponent');
     this.canvasComponent = canvasComponent;
     this.canvasComponent.viewPortAspectRatio = this.viewPortAspectRatio;
+    this.logger.logDebug('exit setCanvasComponent');
   }
 
   getViewPortAspectRatio(): number {
-    console.log('Camera enter getViewPortAspectRatio');
-    console.log('viewPortAspectRatio: ' + this.viewPortAspectRatio);
-    console.log('Camera exit getViewPortAspectRatio');
+    this.logger.logDebug('enter getViewPortAspectRatio');
+    this.logger.logVerbose('viewPortAspectRatio: ' + this.viewPortAspectRatio);
+    this.logger.logDebug('exit getViewPortAspectRatio');
     return this.viewPortAspectRatio;
   }
 
   // todo add methods for adjusting fov
   setHorizontalFieldOfView(horizontalFieldOfView: number): void {
-    console.log('Camera enter setHorizontalFieldOfView');
+    this.logger.logDebug('enter setHorizontalFieldOfView');
     if(horizontalFieldOfView <= 0) {
-      console.log('error: horizontal field of view must be positive');
+      this.logger.logError('horizontal field of view must be positive');
+      this.logger.logDebug('exit setHorizontalFieldOfView');
+      return;
     }
-    else if(horizontalFieldOfView >= 180) {
-      console.log('error: horizontal field of view must be less than 180');
+    if(horizontalFieldOfView >= 180) {
+      this.logger.logError('horizontal field of view must be less than 180');
+      this.logger.logDebug('exit setHorizontalFieldOfView');
+      return;
     }
-    else {
-      this.horizontalFieldOfView = horizontalFieldOfView;
-      // todo recalculate other values affected by change in horizontal field of view
-      this.viewPortDistance = this.viewPortWidth
-        / Math.tan(this.horizontalFieldOfView);
-      // todo move the camera
-      // todo adjust vertical field of view as well?
-    }
-    console.log('horizontalFieldOfView: ' + this.horizontalFieldOfView);
-    console.log('Camera exit setHorizontalFieldOfView');
+    this.horizontalFieldOfView = horizontalFieldOfView;
+    // todo recalculate other values affected by change in horizontal field of view
+    // todo move the camera
+    let cameraDirection: Vector3;
+    cameraDirection = this.calculateCameraDirection();
+
+    this.viewPortDistance = this.viewPortWidth
+      / Math.tan(this.horizontalFieldOfView);
+
+    let cameraMovement: Vector3;
+    cameraMovement = cameraDirection.clone()
+      .scale(this.viewPortDistance);
+
+    this.cameraPosition = this.viewPortCenterPosition.clone()
+      .subtractVector(cameraMovement);
+
+    // todo adjust vertical field of view as well?
+    // if the camera was moved either the view port height or the
+    // vertical field of view must be updated
+    this.logger.logVerbose('horizontalFieldOfView: ' + this.horizontalFieldOfView);
+    this.logger.logDebug('exit setHorizontalFieldOfView');
   }
 
-  // shitty name
-  calculateVisibleTrapezoid(): void {
-    console.log('Camera enter calculateVisibleTrapezoid');
-    // just for this demo I'm going to set the view port and camera positions
-    this.cameraPosition = new Vector2();
-    this.cameraPosition.x = 0;
-    this.cameraPosition.y = 0;
-    this.viewPortCenterPosition = new Vector2();
-    this.viewPortCenterPosition.x = 0;
-    this.viewPortCenterPosition.y = 8;
-    console.log(
-      'cameraPosition ('
-      + this.cameraPosition.x + ', '
-      + this.cameraPosition.y + ')'
-    );
-    console.log(
-      'viewPortCenterPosition ('
-      + this.viewPortCenterPosition.x + ', '
-      + this.viewPortCenterPosition.y + ')'
-    );
-    //
-    let cameraDirection: Vector2; // the direction the camera is facing
-    let leftDirection: Vector2; // perpendicular to the camera direction
-    let rightDirection: Vector2; // perpendicular to the camera direction
-    let nearLeftPoint: Vector2; // the nearest visible point on the left edge
-    let nearRightPoint: Vector2; // the nearest visible point on the right edge
-    let farLeftPoint: Vector2; // the farthest visible point on the left edge
-    let farRightPoint: Vector2; // the farthest visible point on the right edge
+  setMap(map: Map): void {
+    this.logger.logDebug('enter setMap');
+    this.map = map;
+    this.logger.logDebug('exit setMap');
+  }
 
-    cameraDirection = new Vector2();
-    // start by getting the direction the camera is facing
-    cameraDirection.x = (this.viewPortCenterPosition.x - this.cameraPosition.x)
-      / this.viewPortDistance;
-    cameraDirection.y = (this.viewPortCenterPosition.y - this.cameraPosition.y)
-      / this.viewPortDistance;
-    console.log(
+  setCameraPosition(cameraPosition: Vector3): void {
+    this.logger.logDebug('enter setCameraPosition');
+    this.cameraPosition = cameraPosition;
+    this.logger.logDebug('exit setCameraPosition');
+  }
+
+  setViewPortCenterPosition(viewPortCenterPosition: Vector3): void {
+    this.logger.logDebug('enter setViewPortCenterPosition');
+    this.viewPortCenterPosition = viewPortCenterPosition;
+    this.logger.logDebug('exit setViewPortCenterPosition');
+  }
+
+  getViewPortDistance(): number {
+    this.logger.logDebug('enter getViewPortDistance');
+    this.logger.logVerbose('viewPortDistance: ' + this.viewPortDistance);
+    this.logger.logDebug('exit getViewPortDistance');
+    return this.viewPortDistance;
+  }
+
+  setViewPortDistance(viewPortDistance: number): void {
+    this.logger.logDebug('enter setViewPortDistance');
+    if(viewPortDistance <= 0) {
+      this.logger.logError('view port distance must be a positive number');
+      this.logger.logDebug('exit setViewPortDistance');
+      return;
+    }
+    this.viewPortDistance = viewPortDistance;
+    this.logger.logVerbose('viewPortDistance: ' + this.viewPortDistance);
+    this.logger.logDebug('exit setViewPortDistance');
+  }
+
+  calculateCameraDirection(): Vector3 {
+    this.logger.logDebug('enter calculateCameraDirection');
+    let cameraDirection: Vector3;
+    cameraDirection = this.viewPortCenterPosition.clone()
+      .subtractVector(this.cameraPosition)
+      .scale(1 / this.viewPortDistance);
+
+    this.logger.logVerbose(
       'cameraDirection ('
       + cameraDirection.x + ', '
-      + cameraDirection.y + ')'
+      + cameraDirection.y + ', '
+      + cameraDirection.z + ')'
     );
+    this.logger.logDebug('exit calculateCameraDirection');
+    return cameraDirection;
+  }
 
-    // the view port extends out perpendicular from this direction
-    // todo add matrix stuff
+  calculateUpDirection(cameraDirection: Vector3): Vector3 {
+    this.logger.logDebug('enter calculateUpDirection');
+    let upDirection: Vector3;
+    upDirection = new Vector3();
+    // I'm going to cheat for now, todo replace with actual calculations
+    // if/when the camera is able to have a different height than the view port
+    upDirection.setFromValues(
+      0, 0, 1
+    );
+    this.logger.logVerbose(
+      'upDirection ('
+      + upDirection.x + ', '
+      + upDirection.y + ', '
+      + upDirection.z + ')'
+    );
+    this.logger.logDebug('exit calculateUpDirection');
+    return upDirection;
+  }
+
+  calculateDownDirection(cameraDirection: Vector3): Vector3 {
+    this.logger.logDebug('enter calculateDownDirection');
+    let downDirection: Vector3;
+    // I'm going to cheat for now, todo replace with actual calculations
+    // if/when the camera is able to have a different height than the view port
+    downDirection = new Vector3();
+    downDirection.setFromValues(
+      0, 0, -1
+    );
+    this.logger.logVerbose(
+      'downDirection ('
+      + downDirection.x + ', '
+      + downDirection.y + ', '
+      + downDirection.z + ')'
+    );
+    this.logger.logDebug('exit calculateDownDirection');
+    return downDirection;
+  }
+
+  calculateLeftDirection(cameraDirection: Vector3): Vector3 {
+    this.logger.logDebug('enter calculateLeftDirection');
+    let leftDirection: Vector3;
     // rotating 90 degrees counter-clockwise
     // x' = x * cos(90) - y * sin(90)
     // y' = x * sin(90) + y * cos(90)
-    leftDirection = new Vector2();
+    leftDirection = new Vector3();
     leftDirection.x = cameraDirection.x * 0 - cameraDirection.y * 1;
-    leftDirection.y = cameraDirection.x * 1 - cameraDirection.y * 0;
-    console.log(
+    leftDirection.y = cameraDirection.x * 1 + cameraDirection.y * 0;
+    leftDirection.z = 0; // todo real calc? z should never be needed for left direction unless camera can roll/rotate around camera direction
+    this.logger.logVerbose(
       'leftDirection ('
       + leftDirection.x + ', '
-      + leftDirection.y + ')'
+      + leftDirection.y + ', '
+      + leftDirection.z + ')'
     );
+    this.logger.logDebug('exit calculateLeftDirection');
+    return leftDirection;
+  }
+
+  calculateRightDirection(cameraDirection: Vector3): Vector3 {
+    this.logger.logDebug('enter calculateRightDirection');
+    let rightDirection: Vector3;
     // rotating 90 degrees clockwise
     // x' = x * cos(-90) - y * sin(-90)
     // y' = x * sin(-90) + y * cos(-90)
-    rightDirection = new Vector2();
+    rightDirection = new Vector3();
     rightDirection.x = cameraDirection.x * 0 - cameraDirection.y * -1;
-    rightDirection.y = cameraDirection.x * -1 - cameraDirection.y * 0;
-    console.log(
+    rightDirection.y = cameraDirection.x * -1 + cameraDirection.y * 0;
+    rightDirection.z = 0; // todo real calc? z should never be needed for right direction unless camera can roll/rotate around camera direction
+    this.logger.logVerbose(
       'rightDirection ('
       + rightDirection.x + ', '
-      + rightDirection.y + ')'
+      + rightDirection.y + ', '
+      + rightDirection.z + ')'
     );
-
-    // now use the left and right directions to find the near points of the left and right edges
-    // note: both x and y use width as magnitude because height will be z
-    nearLeftPoint = new Vector2();
-    nearLeftPoint.x = this.viewPortCenterPosition.x
-      + leftDirection.x * this.viewPortWidth / 2;
-    nearLeftPoint.y = this.viewPortCenterPosition.y
-      + leftDirection.y * this.viewPortWidth / 2;
-    console.log(
-      'nearLeftPoint ('
-      + nearLeftPoint.x + ', '
-      + nearLeftPoint.y + ')'
-    );
-
-    nearRightPoint = new Vector2();
-    nearRightPoint.x = this.viewPortCenterPosition.x
-      + rightDirection.x * this.viewPortWidth / 2;
-    nearRightPoint.y = this.viewPortCenterPosition.y
-      + rightDirection.y * this.viewPortWidth / 2;
-    console.log(
-      'nearRightPoint ('
-      + nearRightPoint.x + ', '
-      + nearRightPoint.y + ')'
-    );
-
-    /*
-    // method 1 - rays from near points
-    // now we need to calculate the direction from the camera to the left and right edges
-    let leftEdgeRay: Vector2; // a ray going from the camera through the left edge points
-    let rightEdgeRay: Vector2; // a ray going from the camera through the right edge points
-    // todo figure out if I need to use view port distance or actual distance!
-    // let nearDistance: number = 8;Math.sqrt(
-    //   (nearLeftPoint.x - this.cameraPosition.x)
-    //   * (nearLeftPoint.x - this.cameraPosition.x)
-    //   + (nearLeftPoint.y - this.cameraPosition.y)
-    //   * (nearLeftPoint.y - this.cameraPosition.y)
-    // );
-    console.log('nearDistance: ' + nearDistance);
-    leftEdgeRay = new Vector2();
-    leftEdgeRay.x = (nearLeftPoint.x - this.cameraPosition.x) / nearDistance;
-    leftEdgeRay.y = (nearLeftPoint.y - this.cameraPosition.y) / nearDistance;
-    console.log(
-      'leftEdgeRay ('
-      + leftEdgeRay.x + ', '
-      + leftEdgeRay.y + ')'
-    );
-
-    rightEdgeRay = new Vector2();
-    rightEdgeRay.x = (nearRightPoint.x - this.cameraPosition.x) / nearDistance;
-    rightEdgeRay.y = (nearRightPoint.y - this.cameraPosition.y) / nearDistance;
-    console.log(
-      'rightEdgeRay ('
-      + rightEdgeRay.x + ', '
-      + rightEdgeRay.y + ')'
-    );
-    // now use the edge rays to find the far points
-    farLeftPoint = new Vector2();
-    farLeftPoint.x = nearLeftPoint.x + leftEdgeRay.x * this.visibleDistance;
-    farLeftPoint.y = nearLeftPoint.y + leftEdgeRay.y * this.visibleDistance;
-    console.log(
-      'farLeftPoint ('
-      + farLeftPoint.x + ', '
-      + farLeftPoint.y + ')'
-    );
-
-    farRightPoint = new Vector2();
-    farRightPoint.x = nearRightPoint.x + rightEdgeRay.x * this.visibleDistance;
-    farRightPoint.y = nearRightPoint.y + rightEdgeRay.y * this.visibleDistance;
-    console.log(
-      'farRightPoint ('
-      + farRightPoint.x + ', '
-      + farRightPoint.y + ')'
-    );
-    */
-
-    // method 2 - rays out from ray out of view port center
-    let farCenterPoint: Vector2; // the center of the far view plane
-    let scaledViewPortWidth: number; // the view port width scaled to max distance
-    // start by projecting a ray out from the view port center using the camera direction and visible distance
-    farCenterPoint = new Vector2();
-    farCenterPoint.x = this.viewPortCenterPosition.x
-      + cameraDirection.x * this.visibleDistance;
-    farCenterPoint.y = this.viewPortCenterPosition.y
-      + cameraDirection.y * this.visibleDistance;
-
-    // now scale the view port width
-    scaledViewPortWidth = this.viewPortWidth / this.viewPortDistance * (this.viewPortDistance + this.visibleDistance);
-
-    farLeftPoint = new Vector2();
-    farLeftPoint.x = farCenterPoint.x
-      + leftDirection.x * scaledViewPortWidth / 2;
-    farLeftPoint.y = farCenterPoint.y
-      + leftDirection.y * scaledViewPortWidth / 2;
-    console.log(
-      'farLeftPoint ('
-      + farLeftPoint.x + ', '
-      + farLeftPoint.y + ')'
-    );
-    farRightPoint = new Vector2();
-    farRightPoint.x = farCenterPoint.x
-      + rightDirection.x * scaledViewPortWidth / 2;
-    farRightPoint.y = farCenterPoint.y
-      + rightDirection.y * scaledViewPortWidth / 2;
-    console.log(
-      'farRightPoint ('
-      + farRightPoint.x + ', '
-      + farRightPoint.y + ')'
-    );
-    console.log('Camera exit calculateVisibleTrapezoid');
+    this.logger.logDebug('exit calculateRightDirection');
+    return rightDirection;
   }
 
-/*
-  // note won't be a frustum until 3d
-  // canned until that transition happens
   calculateViewFrustum(): void {
-    console.log('Camera enter calculateViewFrustum');
-    console.log(
-      'view port center at ('
-      + this.viewPortCenterPosition.x + ', '
-      + this.viewPortCenterPosition.y + ')'
-    );
-
-    console.log('camera at (,)');
-    console.log('near plane calculations');
-    let nearTopLeft: Vector2;
-    let nearTopRight: Vector2;
-    let nearBottomLeft: Vector2;
-    let nearBottomRight: Vector2;
-    // todo calculate using position to get angle
-    // located perpendicular to the camera-viewport line
-    nearTopLeft.x = this.viewPortCenterPosition.x;
-    nearTopLeft.y = this.viewPortCenterPosition.y;
-    nearTopRight.x = this.viewPortCenterPosition.x;
-    nearTopRight.y = this.viewPortCenterPosition.y;
-    nearBottomLeft.x = this.viewPortCenterPosition.x;
-    nearBottomLeft.y = this.viewPortCenterPosition.y;
-    nearBottomRight.x = this.viewPortCenterPosition.x;
-    nearBottomRight.y = this.viewPortCenterPosition.y;
-    console.log('Camera exit calculateViewFrustum');
+    this.logger.logDebug('enter calculateViewFrustum');
+    this.viewFrustum = new Frustum().calculate(this);
+    this.logger.logDebug('exit calculateViewFrustum');
   }
-  */
+
+  turnLeft(): void {
+    this.logger.logDebug('enter turnLeft');
+    // todo
+    // rotate the camera direction
+    // recalculate the other directions
+    // move the camera
+    // recalculate the view frustum
+    this.logger.logDebug('exit turnLeft');
+  }
+
+  turnRight(): void {
+    this.logger.logDebug('enter turnRight');
+    // todo
+    // rotate the camera direction
+    // recalculate the other directions
+    // move the camera
+    // recalculate the view frustum
+    this.logger.logDebug('exit turnRight');
+  }
 
   renderFrame(): void {
-    console.log('Camera enter renderFrame');
+    this.logger.logDebug('enter renderFrame');
+    if(!this.canvasComponent) {
+      this.logger.logError('canvas component not set');
+      this.logger.logDebug('exit renderFrame');
+      return;
+    }
     // render frame onto frame buffer canvas
     this.clearFrame();
     this.renderContext.fillStyle = '#00ff00';
     this.renderContext.strokeStyle = '#00ff00';
+    // todo ask map for all things inside of view frustum
+    // sort by distance from camera
+    // draw from furthest away to nearest
     //this.drawLines();
     //this.drawRects();
-    if(this.canvasComponent) {
-      // have the canvas component draw the rendered frame
-      this.canvasComponent.drawFrame(
-        this.bufferCanvas
-      );
-    }
-    else {
-      console.log('error: canvas component not set');
-    }
-    console.log('Camera exit renderFrame');
+    // have the canvas component draw the rendered frame
+    this.canvasComponent.drawFrame(
+      this.bufferCanvas
+    );
+    this.logger.logDebug('exit renderFrame');
   }
 
   private clearFrame(): void {
-    console.log('Camera enter clearFrame');
+    this.logger.logDebug('enter clearFrame');
     this.renderContext.fillStyle = '#000000';
     this.fillRect(
       0, 0,
       this.bufferCanvasWidth, this.bufferCanvasHeight
     );
-    console.log('Camera exit clearFrame');
+    this.logger.logDebug('exit clearFrame');
   }
 /*
   private drawLines(): void {
-    console.log('Camera enter drawLines');
+    this.logger.logDebug('enter drawLines');
     let halfCanvasWidth: number;
     let halfCanvasHeight: number;
     let ix: number; // horizontal position relative to camera center
@@ -367,10 +347,10 @@ export class Camera {
         //halfCanvasWidth + px / this.viewPortWidth * halfCanvasWidth;
         toY = this.bufferCanvasHeight * (-py + this.viewPortHeight / 2) / this.viewPortHeight;
 
-        //console.log('fromX: ' + fromX);
-        //console.log('fromY: ' + fromY);
-        //console.log('toX: ' + toX);
-        //console.log('toY: ' + toY);
+        //this.logger.logVerbose('fromX: ' + fromX);
+        //this.logger.logVerbose('fromY: ' + fromY);
+        //this.logger.logVerbose('toX: ' + toX);
+        //this.logger.logVerbose('toY: ' + toY);
         this.drawLine(
           fromX, fromY,
           toX, toY
@@ -402,21 +382,21 @@ export class Camera {
         //halfCanvasWidth + px / this.viewPortWidth * halfCanvasWidth;
         toY = this.bufferCanvasHeight * (-py + this.viewPortHeight / 2) / this.viewPortHeight;
 
-        //console.log('fromX: ' + fromX);
-        //console.log('fromY: ' + fromY);
-        //console.log('toX: ' + toX);
-        //console.log('toY: ' + toY);
+        //this.logger.logVerbose('fromX: ' + fromX);
+        //this.logger.logVerbose('fromY: ' + fromY);
+        //this.logger.logVerbose('toX: ' + toX);
+        //this.logger.logVerbose('toY: ' + toY);
         this.drawLine(
           fromX, fromY,
           toX, toY
         );
       }
     }
-    console.log('Camera exit drawLines');
+    this.logger.logDebug('exit drawLines');
   }
 
   private drawRects(): void {
-    console.log('Camera enter drawRects');
+    this.logger.logDebug('enter drawRects');
     let id: number; // distance relative to camera
     let ix: number; // horizontal position relative to camera center
     let iy: number; // vertical position relative to camera center
@@ -452,17 +432,17 @@ export class Camera {
       drawWidth = this.bufferCanvasWidth * pw / this.viewPortWidth;
       drawHeight = this.bufferCanvasHeight * ph / this.viewPortHeight;
 
-      //console.log('fromX: ' + fromX);
-      //console.log('fromY: ' + fromY);
-      //console.log('drawWidth: ' + drawWidth);
-      //console.log('drawHeight: ' + drawHeight);
+      //this.logger.logVerbose('fromX: ' + fromX);
+      //this.logger.logVerbose('fromY: ' + fromY);
+      //this.logger.logVerbose('drawWidth: ' + drawWidth);
+      //this.logger.logVerbose('drawHeight: ' + drawHeight);
 
       this.strokeRect(
         fromX, fromY,
         drawWidth, drawHeight
       );
     }
-    console.log('Camera exit drawRects');
+    this.logger.logDebug('exit drawRects');
   }
 */
 
@@ -472,12 +452,12 @@ export class Camera {
     toX: number,
     toY: number
   ): void {
-    console.log('Camera enter strokeRect');
+    this.logger.logDebug('enter strokeRect');
     this.renderContext.strokeRect(
       fromX, fromY,
       toX, toY
     );
-    console.log('Camera exit strokeRect');
+    this.logger.logDebug('exit strokeRect');
   }
 
   private fillRect(
@@ -486,12 +466,12 @@ export class Camera {
     toX: number,
     toY: number
   ): void {
-    console.log('Camera enter fillRect');
+    this.logger.logDebug('enter fillRect');
     this.renderContext.fillRect(
       fromX, fromY,
       toX, toY
     );
-    console.log('Camera exit fillRect');
+    this.logger.logDebug('exit fillRect');
   }
 
   private drawLine(
@@ -500,11 +480,11 @@ export class Camera {
     toX: number,
     toY: number
   ): void {
-    console.log('Camera enter drawLine');
+    this.logger.logDebug('enter drawLine');
     this.renderContext.beginPath();
     this.renderContext.moveTo(fromX, fromY);
     this.renderContext.lineTo(toX, toY);
     this.renderContext.stroke();
-    console.log('Camera exit drawLine');
+    this.logger.logDebug('exit drawLine');
   }
 }
