@@ -7,7 +7,7 @@ import { Vector3 } from './vector3';
 
 export class Frustum {
   logger: Logger = LoggingService.getLogger('Frustum');
-
+  // points
   nearTopLeftPoint: Vector3;
   nearTopRightPoint: Vector3;
   nearBottomLeftPoint: Vector3;
@@ -16,6 +16,7 @@ export class Frustum {
   farTopRightPoint: Vector3;
   farBottomLeftPoint: Vector3;
   farBottomRightPoint: Vector3;
+  // planes
   leftPlane: Plane;
   rightPlane: Plane;
   topPlane: Plane;
@@ -99,10 +100,10 @@ export class Frustum {
     this.logger.logDebug('enter calculatePoints');
     let cameraPosition: Vector3;
     let viewPortCenterPosition: Vector3;
-    let viewPortWidth: number;
-    let viewPortHeight: number;
-    let viewPortDistance: number;
-    let visibleDistance: number;
+    let viewPortWidth: number; // the width of the view port at the view port distance
+    let viewPortHeight: number; // the height of the view port at the view port distance
+    let viewPortDistance: number; // the distance to the near plane
+    let visibleDistance: number; // the distance visible beyond the near plane
     let cameraDirection: Vector3;
     let upDirection: Vector3;
     let downDirection: Vector3;
@@ -112,10 +113,10 @@ export class Frustum {
     let nearRightMovement: Vector3;
     let nearTopMovement: Vector3;
     let nearBottomMovement: Vector3;
-    let farMovement: Vector3;
+    let farMovement: Vector3; // the transformation from the near plane to the far plane
     let farViewCenter: Vector3;
-    let scaledViewPortWidth: number;
-    let scaledViewPortHeight: number;
+    let scaledViewPortWidth: number; // the width of the view port at the max visible distance
+    let scaledViewPortHeight: number; // the height of the view port at the max visible distance
     let farLeftMovement: Vector3;
     let farRightMovement: Vector3;
     let farTopMovement: Vector3;
@@ -185,10 +186,9 @@ export class Frustum {
       + this.nearBottomRightPoint.z + ')'
     );
 
-    // now extend out from the view port center
+    // now extend the visible distance out from the view port center
     farMovement = cameraDirection.clone()
       .scale(visibleDistance);
-
     farViewCenter = viewPortCenterPosition.clone()
       .addVector(farMovement);
     this.logger.logVerbose(

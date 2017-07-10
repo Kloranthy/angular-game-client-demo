@@ -6,7 +6,7 @@ import { Vector3 } from './vector3';
 export class Plane {
   logger: Logger = LoggingService.getLogger('Plane');
 
-  normal: Vector3; // the normal extending from the origin
+  normal: Vector3; // the normal vector of the plane
   distance: number; // the distance of the normal from the origin
 
   constructor(
@@ -15,6 +15,7 @@ export class Plane {
     this.logger.logDebug('exit constructor');
   }
 
+  // initialization
   setFromValues(
     normal: Vector3,
     distance: number
@@ -22,6 +23,7 @@ export class Plane {
     this.logger.logDebug('enter setFromValues');
     this.normal = normal;
     this.distance = distance;
+    this.normalize();
     this.logger.logVerbose('normal: ' + this.normal);
     this.logger.logVerbose('distance: ' + this.distance);
     this.logger.logDebug('exit setFromValues');
@@ -42,6 +44,7 @@ export class Plane {
       .subtractVector(pointA);
     this.normal = v.cross(u);
     this.distance = this.normal.dot(pointA);
+    this.normalize();
     this.logger.logVerbose(
       'normal ('
       + this.normal.x + ', '
@@ -53,24 +56,57 @@ export class Plane {
     return this;
   }
 
+  setFromNormalVectorAndAPoint(
+    normal: Vector3,
+    point: Vector3
+  ): Plane {
+    this.logger.logDebug(
+      'enter setFromNormalVectorAndAPoint'
+    );
+    this.normal = normal;
+    this.distance = this.normal.dot(point);
+    this.normalize();
+    this.logger.logDebug(
+      'exit setFromNormalVectorAndAPoint'
+    );
+    return this;
+  }
+
   setFromPlane(plane: Plane): Plane {
     this.logger.logDebug('enter setFromPlane');
     this.setFromValues(
       plane.normal,
       plane.distance
     );
+    this.normalize();
     this.logger.logDebug('exit setFromPlane');
     return this;
   }
 
+  // modification
+  normalize(): Plane {
+    this.logger.logDebug('enter normalize');
+    let magnitude: number;
+    magnitude = this.normal.getMagnitude();
+    this.normal.normalize();
+    this.distance = this.distance / magnitude;
+    this.logger.logDebug('exit normalize');
+    return this;
+  }
+
+  // products
   distanceBetweenPlaneAndPoint(
     point: Vector3
   ): number {
-    this.logger.logDebug('enter distanceBetweenPlaneAndPoint');
+    this.logger.logDebug(
+      'enter distanceBetweenPlaneAndPoint'
+    );
     let dotProduct: number;
     dotProduct = this.normal.dot(point) + this.distance;
     this.logger.logVerbose('distance: ' + dotProduct);
-    this.logger.logDebug('exit distanceBetweenPlaneAndPoint');
+    this.logger.logDebug(
+      'exit distanceBetweenPlaneAndPoint'
+    );
     return dotProduct;
   }
 

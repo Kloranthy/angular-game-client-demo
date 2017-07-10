@@ -82,7 +82,7 @@ export class Vector3 {
       this.logger.logDebug('exit normalize');
       return this;
     }
-    this.scale(1 / Math.sqrt(length * length));
+    this.scale(1 / length);
     this.logger.logDebug('exit normalize');
     return this;
   }

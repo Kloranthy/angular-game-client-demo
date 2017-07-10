@@ -14,6 +14,8 @@ import { CameraControlComponent } from './component/camera-control/camera-contro
   ],
   exports: [
     CanvasComponent
-  ]
+  ],
+  providers: []
 })
-export class RenderModule { }
+export class RenderModule {
+}
