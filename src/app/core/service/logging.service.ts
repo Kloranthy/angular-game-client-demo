@@ -15,7 +15,10 @@ export class LoggingService {
 
   showTimeStamp: boolean;
 
+  whiteListedSources: string[];
   blackListedSources: string[];
+
+  showOnlyWhiteListedSources: boolean;
 
   static instance: LoggingService;
 
@@ -24,9 +27,15 @@ export class LoggingService {
       console.log('instance already exists');
       return null;
     }
-    this.currentLogLevel = 1;
+    this.currentLogLevel = 2;
     this.showTimeStamp = false;
+    this.showOnlyWhiteListedSources = true;
+    this.whiteListedSources = [];
     this.blackListedSources = [];
+    // initial whitelist configuration
+    this.whiteListedSource('Frustum');
+    this.whiteListedSource('Plane');
+    // initial blacklist configuration
     this.blackListSource('Tile');
     this.blackListSource('Vector3');
     this.blackListSource('Entity');
@@ -39,7 +48,6 @@ export class LoggingService {
 
   static getInstance() {
     // todo learn how to do proper singletons in typescript
-    //console.log('getInstance called');
     if(!LoggingService.instance) {
       LoggingService.instance = new LoggingService();
     }
@@ -101,10 +109,19 @@ export class LoggingService {
     );
   }
 
+  whiteListedSource(source: string): void {
+    if(this.whiteListedSources.includes(source)) {
+      return;
+    }
+    // todo remove from blacklist?
+    this.whiteListedSources.push(source);
+  }
+
   blackListSource(source: string): void {
     if(this.blackListedSources.includes(source)) {
       return;
     }
+    // todo remove from whitelist?
     this.blackListedSources.push(source);
   }
 
@@ -117,6 +134,12 @@ export class LoggingService {
       return;
     }
     if(this.blackListedSources.includes(source)) {
+      return;
+    }
+    if(
+      this.showOnlyWhiteListedSources
+      && !this.whiteListedSources.includes(source)
+    ) {
       return;
     }
     let out: string;
