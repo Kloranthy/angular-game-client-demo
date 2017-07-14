@@ -15,6 +15,7 @@ export class Camera {
   viewPortCenterPosition: Vector3; // the position of the center of the view port in world coordinates
   cameraPosition: Vector3; // the position of the camera in world coordinates
 
+  // todo replace this with horizontal fov and aspect ratio
   viewPortWidth: number; // the width of the view port
   viewPortHeight: number; // the height of the view port
   viewPortAspectRatio: number; // the aspect ratio of the view port

@@ -20,6 +20,8 @@ export class CanvasComponent implements AfterViewInit {
   canvasWidth: number; // the width of the canvas
   canvasHeight: number; // the height of the canvas
 
+  // todo create some kind of wrapper class to contain
+  // all the repeated/common canvas drawing functions
   @ViewChild('canvas') canvas: ElementRef;
 
   renderContext: CanvasRenderingContext2D;

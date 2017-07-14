@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { CanvasComponent } from './component/canvas/canvas.component';
 import { CameraControlComponent } from './component/camera-control/camera-control.component';
+import { RenderService } from './service/render.service';
 
 @NgModule({
   imports: [
@@ -15,7 +16,7 @@ import { CameraControlComponent } from './component/camera-control/camera-contro
   exports: [
     CanvasComponent
   ],
-  providers: []
+  providers: [ RenderService ]
 })
 export class RenderModule {
 }
