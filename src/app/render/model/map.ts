@@ -81,23 +81,41 @@ export class Map {
     let viewPortDistance: number;
     let viewPortCenterPosition: Vector3;
 
-    cameraPosition = new Vector3();
-    cameraPosition.setFromValues(
-      20, 20, 2
-    );
+    camera.setMap(this);
+
+    cameraPosition = new Vector3()
+      .setFromValues(
+        20, 20, 5
+      );
 
     camera.setCameraPosition(cameraPosition);
 
     viewPortDistance = camera.getViewPortDistance();
 
-    viewPortCenterPosition = new Vector3();
-    viewPortCenterPosition.setFromValues(
-      20, 20 + viewPortDistance, 2
-    );
+    viewPortCenterPosition = new Vector3().setFromValues(
+        20, 20 + viewPortDistance, 5
+      );
 
     camera.setViewPortCenterPosition(viewPortCenterPosition);
 
-    camera.calculateViewFrustum();
+    let frustum: Frustum;
+    frustum = camera.getViewFrustum();
+
+    let point: Vector3;
+    let result: boolean;
+    point = new Vector3()
+      .setFromValues(
+        20, 35, 2
+      );
+    result = frustum.containsPoint(point);
+    console.log('result: ' + result);
+
+    point.setFromValues(
+      50, 50, 3
+    );
+    result = frustum.containsPoint(point);
+    console.log('result: ' + result);
+
     this.logger.logDebug('exit placeCameraHardCodedDemo');
   }
 
@@ -165,6 +183,18 @@ export class Map {
       this.logger.logVerbose(line);
     }
     this.logger.logDebug('exit printMap');
+  }
+
+  getUpDirection(): Vector3 {
+    this.logger.logDebug('enter getUpDirection');
+    this.logger.logVerbose(
+      'upDirection: ('
+      + this.zDirection.x + ','
+      + this.zDirection.y + ','
+      + this.zDirection.z + ')'
+    );
+    this.logger.logDebug('exit getUpDirection');
+    return this.zDirection;
   }
 
   getTileAt(

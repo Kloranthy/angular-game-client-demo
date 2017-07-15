@@ -53,7 +53,6 @@ export class AppComponent implements AfterViewInit {
     this.logger.logDebug('enter ngAfterViewInit');
     // create the camera
     this.camera = new Camera();
-    this.camera.setCanvasComponent(this.canvas);
     // create the map
     this.map = new Map();
     this.map.hardCodedDemo();
@@ -72,18 +71,6 @@ export class AppComponent implements AfterViewInit {
     this.logger.logDebug('enter onControlPressed');
     this.inputProcessor.process(input);
     this.logger.logDebug('exit onControlPressed');
-  }
-
-  renderTest():void {
-    this.logger.logDebug('enter renderTest');
-    this.renderFrame();
-    this.logger.logDebug('exit renderTest');
-  }
-
-  renderFrame(): void {
-    this.logger.logDebug('enter renderFrame');
-    this.camera.renderFrame();
-    this.logger.logDebug('exit renderFrame');
   }
 
   calculateElementDimensions() {

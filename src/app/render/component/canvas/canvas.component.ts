@@ -5,6 +5,7 @@ import {
 import { LoggingService } from '../../../core/service/logging.service';
 import { Logger } from '../../../core/model/logger';
 
+import { RenderService } from '../../service/render.service';
 import { Camera } from '../../model/camera';
 
 @Component({
@@ -26,7 +27,9 @@ export class CanvasComponent implements AfterViewInit {
 
   renderContext: CanvasRenderingContext2D;
 
-  constructor() {
+  constructor(
+    private renderService: RenderService
+  ) {
     this.logger.logDebug('enter constructor');
     this.logger.logDebug('exit constructor');
   }
@@ -34,7 +37,7 @@ export class CanvasComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.logger.logDebug('enter ngAfterViewInit');
     const canvasElement: HTMLCanvasElement = this.canvas.nativeElement;
-    this.renderContext = canvasElement.getContext('2d');
+    this.renderService.setDisplayCanvas(canvasElement);
     this.logger.logDebug('exit ngAfterViewInit');
   }
 

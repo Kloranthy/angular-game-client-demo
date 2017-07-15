@@ -87,10 +87,28 @@ export class Frustum {
   }
 
   calculate(
-    camera: Camera
+    horizontalFieldOfView: number,
+    viewPortAspectRatio: number,
+    viewPortDistance: number,
+    visibleDistance: number,
+    cameraPosition: Vector3,
+    viewPortCenterPosition: Vector3,
+    cameraForwardDirection: Vector3,
+    cameraRightDirection: Vector3,
+    cameraUpDirection: Vector3
   ): Frustum {
     this.logger.logDebug('enter calculate');
-    this.calculatePoints(camera);
+    this.calculatePoints(
+      horizontalFieldOfView,
+      viewPortAspectRatio,
+      viewPortDistance,
+      visibleDistance,
+      cameraPosition,
+      viewPortCenterPosition,
+      cameraForwardDirection,
+      cameraRightDirection,
+      cameraUpDirection
+    );
     this.calculatePlanes();
     this.logger.logDebug('exit calculate');
     return this;
@@ -139,41 +157,80 @@ export class Frustum {
 
   containsPoint(point: Vector3): boolean {
     this.logger.logDebug('enter containsPoint');
-    this.logger.logVerbose('point: ' + point);
+    this.logger.logVerbose(
+      'point: ('
+      + point.x + ','
+      + point.y + ','
+      + point.z + ')'
+    );
+    this.logger.logVerbose('testing left plane');
+    if(this.leftPlane.distanceBetweenPlaneAndPoint(point) < 0) {
+      this.logger.logVerbose('point outside left plane');
+      this.logger.logDebug('exit containsPoint');
+      return false;
+    }
+    this.logger.logVerbose('testing right plane');
+    if(this.rightPlane.distanceBetweenPlaneAndPoint(point) < 0) {
+      this.logger.logVerbose('point outside right plane');
+      this.logger.logDebug('exit containsPoint');
+      return false;
+    }
+    this.logger.logVerbose('testing top plane');
+    if(this.topPlane.distanceBetweenPlaneAndPoint(point) < 0) {
+      this.logger.logVerbose('point outside top plane');
+      this.logger.logDebug('exit containsPoint');
+      return false;
+    }
+    this.logger.logVerbose('testing bottom plane');
+    if(this.bottomPlane.distanceBetweenPlaneAndPoint(point) < 0) {
+      this.logger.logVerbose('point outside bottom plane');
+      this.logger.logDebug('exit containsPoint');
+      return false;
+    }
+    this.logger.logVerbose('testing near plane');
+    if(this.nearPlane.distanceBetweenPlaneAndPoint(point) < 0) {
+      this.logger.logVerbose('point outside near plane');
+      this.logger.logDebug('exit containsPoint');
+      return false;
+    }
+    this.logger.logVerbose('testing far plane');
+    if(this.farPlane.distanceBetweenPlaneAndPoint(point) < 0) {
+      this.logger.logVerbose('point outside far plane');
+      this.logger.logDebug('exit containsPoint');
+      return false;
+    }
+
+    /* temporarily doing it manually
     let planes: Plane[];
     planes = this.getPlanes();
-    for(let plane of planes) {
-      if(plane.distanceBetweenPlaneAndPoint(point) < 0) {
+    for(let i: number = 0; i < planes.length; i++) {
+      if(planes[i].distanceBetweenPlaneAndPoint(point) < 0) {
         return false;
       }
     }
+    */
     this.logger.logDebug('exit containsPoint');
     return true;
   }
 
-  // NOTE: still broken despite what the linter says! many variables are not defined as I do not have getters made/called!
-  private calculatePoints(camera: Camera): Frustum {
+  private calculatePoints(
+    horizontalFieldOfView: number,
+    viewPortAspectRatio: number,
+    viewPortDistance: number,
+    visibleDistance: number,
+    cameraPosition: Vector3,
+    viewPortCenterPosition: Vector3,
+    cameraForwardDirection: Vector3,
+    cameraRightDirection: Vector3,
+    cameraUpDirection: Vector3
+  ): Frustum {
     this.logger.logDebug('enter calculatePoints');
-    // camera
-    let cameraPosition: Vector3;
-    let viewPortCenterPosition: Vector3;
-    let horizontalFieldOfView: number;
-    let viewPortDistance: number;
-    let visibleDistance: number;
-    let viewPortAspectRatio: number;
-    let cameraForwardDirection: Vector3;
-    let cameraRightDirection: Vector3;
-    let cameraUpDirection: Vector3;
-    //
     let nearViewPortWidth: number;
     let nearViewPortHeight: number;
     let farViewCenter: Vector3;
     let farViewPortWidth: number;
     let farViewPortHeight: number;
-    //
-    cameraPosition = camera.getCameraPosition();
-    horizontalFieldOfView = camera.getHorizontalFieldOfView();
-    viewPortAspectRatio = camera.getViewPortAspectRatio();
+
     // NOTE: these are half width and height???
     nearViewPortWidth = Math.tan(horizontalFieldOfView / 2)
       * viewPortDistance;
@@ -329,42 +386,42 @@ export class Frustum {
 
   private calculatePlanes(): Frustum {
     this.logger.logDebug('enter calculatePlanes');
-    this.logger.logVerbose('leftPlane');
+    this.logger.logVerbose('leftPlane set using ftl, ntl, nbl');
     this.leftPlane = new Plane()
       .setFrom3Points(
+        this.farTopLeftPoint,
         this.nearTopLeftPoint,
-        this.nearBottomLeftPoint,
-        this.farBottomLeftPoint
+        this.nearBottomLeftPoint
       );
-    this.logger.logVerbose('rightPlane');
+    this.logger.logVerbose('rightPlane set using ntr, ftr, fbr');
     this.rightPlane = new Plane()
       .setFrom3Points(
-        this.nearBottomRightPoint,
         this.nearTopRightPoint,
+        this.farTopRightPoint,
         this.farBottomRightPoint
       );
-    this.logger.logVerbose('topPlane');
+    this.logger.logVerbose('topPlane set using ntr, ntl, ftl');
     this.topPlane = new Plane()
       .setFrom3Points(
         this.nearTopRightPoint,
         this.nearTopLeftPoint,
         this.farTopLeftPoint
       );
-    this.logger.logVerbose('bottomPlane');
+    this.logger.logVerbose('bottomPlane set using nbl, nbr, fbr');
     this.bottomPlane = new Plane()
       .setFrom3Points(
         this.nearBottomLeftPoint,
         this.nearBottomRightPoint,
-        this.farBottomLeftPoint
+        this.farBottomRightPoint
       );
-    this.logger.logVerbose('nearPlane');
+    this.logger.logVerbose('nearPlane set using ntl, ntr, nbr');
     this.nearPlane = new Plane()
       .setFrom3Points(
         this.nearTopLeftPoint,
         this.nearTopRightPoint,
         this.nearBottomRightPoint
       );
-    this.logger.logVerbose('farPlane');
+    this.logger.logVerbose('farPlane set using ftr, ftl, fbl');
     this.farPlane = new Plane()
       .setFrom3Points(
         this.farTopRightPoint,

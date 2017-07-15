@@ -12,12 +12,12 @@ export class Camera {
 
   map: Map; // the map the camera is located in
 
-  viewPortCenterPosition: Vector3; // the position of the center of the view port in world coordinates
   horizontalFieldOfView: number; // visible angle in degrees
   viewPortAspectRatio: number; // the aspect ratio of the view port
   viewPortDistance: number; // the distance from the camera to the view port center
   visibleDistance: number; // the distance drawn beyond the view port
 
+  viewPortCenterPosition: Vector3; // the position of the center of the view port in world coordinates
   cameraPosition: Vector3; // the position of the camera in world coordinates
 
   // todo use a coordinate system object to hold the camera up, forward, and right directions
@@ -56,9 +56,14 @@ export class Camera {
     viewPortAspectRatio: number,
     viewPortDistance: number,
     visibleDistance: number
-  ): void {
+  ): Camera {
+    this.logger.logDebug('enter setInternals');
     this.setHorizontalFieldOfView(horizontalFieldOfView)
-      .setViewPortAspectRatio(viewPortAspectRatio);
+      .setViewPortAspectRatio(viewPortAspectRatio)
+      .setViewPortDistance(viewPortDistance)
+      .setVisibleDistance(visibleDistance);
+    this.logger.logDebug('exit setInternals');
+    return this;
   }
   /**
     attempts to set the horizontalFieldOfView
@@ -169,75 +174,93 @@ export class Camera {
     return this;
   }
 
+  /**
+    sets the cameraPosition
+  */
+  setCameraPosition(cameraPosition: Vector3): Camera {
+    this.logger.logDebug('enter setCameraPosition');
+    this.cameraPosition = cameraPosition;
+    this.logger.logVerbose(
+      'cameraPosition: ('
+      + this.cameraPosition.x + ','
+      + this.cameraPosition.y + ','
+      + this.cameraPosition.z + ')'
+    );
+    this.logger.logDebug('exit setCameraPosition');
+    return this;
+  }
+
   // modification
-  /**
-    attempts to update the viewPortDistance
-  */
-  updateViewPortDistance(viewPortDistance: number): Camera {
-    this.logger.logDebug('enter updateViewPortDistance');
-    let oldViewPortDistance: number;
-    oldViewPortDistance = this.viewPortDistance;
-    this.setViewPortDistance(viewPortDistance);
-    if(this.viewPortDistance === oldViewPortDistance) {
-      this.logger.logVerbose('viewPortDistance unchanged');
-      this.logger.logDebug('exit updateViewPortDistance');
-      return this;
-    }
-    if(this.zDirection) {
-      this.logger.logVerbose(
-        'using camera forward direction to recalculate camera position'
-      );
-      this.calculateCameraPosition();
-      // calculate view frustum too?
-    }
-    this.logger.logDebug('exit updateViewPortDistance');
-    return this;
-  }
-
-  /**
-    attempts to update the visible distance
-  */
-  updateVisibleDistance(visibleDistance: number): Camera {
-    this.logger.logDebug('enter updateVisibleDistance');
-    let oldVisibleDistance: number;
-    oldVisibleDistance = this.visibleDistance;
-    this.setVisibleDistance(visibleDistance);
-    if(this.visibleDistance === oldVisibleDistance) {
-      this.logger.logVerbose('visibleDistance unchanged');
-      this.logger.logDebug('exit updateVisibleDistance');
-      return this;
-    }
-    this.logger.logDebug('exit updateVisibleDistance');
-    return this;
-  }
-
-  turnLeft(): Camera {
-    this.logger.logDebug('enter turnLeft');
-    // todo
-    // rotate the camera direction using matrix
-    //this.zDirection.
-    this.calculateCameraRightDirection()
-      .calculateCameraUpDirection()
-      .calculateCameraPosition()
-      .calculateViewFrustum();
-    this.logger.logDebug('exit turnLeft');
-    return this;
-  }
-
-  turnRight(): Camera {
-    this.logger.logDebug('enter turnRight');
-    // todo
-    // rotate the camera direction using matrix
-    //this.zDirection.
-    this.calculateCameraRightDirection()
-      .calculateCameraUpDirection()
-      .calculateCameraPosition()
-      .calculateViewFrustum();
-    this.logger.logDebug('exit turnRight');
-    return this;
-  }
-
-  // todo look at position (from direction?)
+  // NOTE: shelved until other refactoring is done
+  // /**
+  //   attempts to update the viewPortDistance
+  // */
+  // updateViewPortDistance(viewPortDistance: number): Camera {
+  //   this.logger.logDebug('enter updateViewPortDistance');
+  //   let oldViewPortDistance: number;
+  //   oldViewPortDistance = this.viewPortDistance;
+  //   this.setViewPortDistance(viewPortDistance);
+  //   if(this.viewPortDistance === oldViewPortDistance) {
+  //     this.logger.logVerbose('viewPortDistance unchanged');
+  //     this.logger.logDebug('exit updateViewPortDistance');
+  //     return this;
+  //   }
+  //   if(this.zDirection) {
+  //     this.logger.logVerbose(
+  //       'using camera forward direction to recalculate camera position'
+  //     );
+  //     this.calculateCameraPosition();
+  //     // calculate view frustum too?
+  //   }
+  //   this.logger.logDebug('exit updateViewPortDistance');
+  //   return this;
+  // }
+  //
+  // /**
+  //   attempts to update the visible distance
+  // */
+  // updateVisibleDistance(visibleDistance: number): Camera {
+  //   this.logger.logDebug('enter updateVisibleDistance');
+  //   let oldVisibleDistance: number;
+  //   oldVisibleDistance = this.visibleDistance;
+  //   this.setVisibleDistance(visibleDistance);
+  //   if(this.visibleDistance === oldVisibleDistance) {
+  //     this.logger.logVerbose('visibleDistance unchanged');
+  //     this.logger.logDebug('exit updateVisibleDistance');
+  //     return this;
+  //   }
+  //   this.logger.logDebug('exit updateVisibleDistance');
+  //   return this;
+  // }
+  //
+  // // NOTE: blocked until vector matrix stuff is done
+  // turnLeft(): Camera {
+  //   this.logger.logDebug('enter turnLeft');
+  //   // todo
+  //   // rotate the camera direction using matrix
+  //   //this.zDirection.
+  //   this.calculateCameraRightDirection()
+  //     .calculateCameraUpDirection()
+  //     .calculateCameraPosition()
+  //     .calculateViewFrustum();
+  //   this.logger.logDebug('exit turnLeft');
+  //   return this;
+  // }
+  //
+  // turnRight(): Camera {
+  //   this.logger.logDebug('enter turnRight');
+  //   // todo
+  //   // rotate the camera direction using matrix
+  //   //this.zDirection.
+  //   this.calculateCameraRightDirection()
+  //     .calculateCameraUpDirection()
+  //     .calculateCameraPosition()
+  //     .calculateViewFrustum();
+  //   this.logger.logDebug('exit turnRight');
+  //   return this;
+  // }
+  //
+  // // todo look at position (from direction?)
 
   // get
   getHorizontalFieldOfView(): number {
@@ -258,30 +281,6 @@ export class Camera {
     return this.viewPortAspectRatio;
   }
 
-  getViewPortCenterPosition(): Vector3 {
-    this.logger.logDebug('enter getViewPortCenterPosition');
-    this.logger.logVerbose(
-      'viewPortCenterPosition: ('
-      + this.viewPortCenterPosition.x + ','
-      + this.viewPortCenterPosition.y + ','
-      + this.viewPortCenterPosition.z + ')'
-  );
-    this.logger.logDebug('exit getViewPortCenterPosition');
-    return this.viewPortCenterPosition;
-  }
-
-  getCameraPosition(): Vector3 {
-    this.logger.logDebug('enter getCameraPosition');
-    this.logger.logVerbose(
-      'cameraPosition: ('
-      + this.cameraPosition.x + ','
-      + this.cameraPosition.y + ','
-      + this.cameraPosition.z + ')'
-    );
-    this.logger.logDebug('exit getCameraPosition');
-    return this.cameraPosition;
-  }
-
   getViewPortDistance(): number {
     this.logger.logDebug('enter getViewPortDistance');
     this.logger.logVerbose(
@@ -298,6 +297,30 @@ export class Camera {
     );
     this.logger.logDebug('exit getVisibleDistance');
     return this.visibleDistance;
+  }
+
+  getViewPortCenterPosition(): Vector3 {
+    this.logger.logDebug('enter getViewPortCenterPosition');
+    this.logger.logVerbose(
+      'viewPortCenterPosition: ('
+      + this.viewPortCenterPosition.x + ','
+      + this.viewPortCenterPosition.y + ','
+      + this.viewPortCenterPosition.z + ')'
+    );
+    this.logger.logDebug('exit getViewPortCenterPosition');
+    return this.viewPortCenterPosition;
+  }
+
+  getCameraPosition(): Vector3 {
+    this.logger.logDebug('enter getCameraPosition');
+    this.logger.logVerbose(
+      'cameraPosition: ('
+      + this.cameraPosition.x + ','
+      + this.cameraPosition.y + ','
+      + this.cameraPosition.z + ')'
+    );
+    this.logger.logDebug('exit getCameraPosition');
+    return this.cameraPosition;
   }
 
   getCameraForwardDirection(): Vector3 {
@@ -336,6 +359,12 @@ export class Camera {
     return this.yDirection;
   }
 
+  getViewFrustum(): Frustum {
+    this.logger.logDebug('enter getViewFrustum');
+    this.calculateViewFrustum();
+    this.logger.logDebug('exit getViewFrustum');
+    return this.viewFrustum;
+  }
   /**
     attempts to calculate the cameraPosition using the
     viewPortCenterPosition, the viewPortDistance, and
@@ -397,7 +426,9 @@ export class Camera {
   */
   private calculateCameraRightDirection(): Camera {
     this.logger.logDebug('enter calculateCameraRightDirection');
-    this.xDirection = this.zDirection.cross(this.map.zDirection)
+    this.xDirection = this.zDirection.cross(
+      this.map.getUpDirection()
+    )
       .normalize();
     this.logger.logVerbose(
       'cameraRightDirection: ('
@@ -414,7 +445,7 @@ export class Camera {
   */
   private calculateCameraUpDirection(): Camera {
     this.logger.logDebug('enter calculateCameraUpDirection');
-    this.yDirection = this.zDirection.cross(this.xDirection);
+    this.yDirection = this.xDirection.cross(this.zDirection);
     this.logger.logVerbose(
       'cameraUpDirection: ('
       + this.yDirection.x + ', '
@@ -427,25 +458,18 @@ export class Camera {
 
   private calculateViewFrustum(): Camera {
     this.logger.logDebug('enter calculateViewFrustum');
-    // check that all the required variables are defined
-    if(!this.cameraPosition) {
-      this.logger.logError('cameraPosition undefined');
-      this.logger.logDebug('exit calculateViewFrustum');
-      return this;
-    }
-    if(!this.viewPortCenterPosition) {
-      this.logger.logError('viewPortCenterPosition undefined');
-      this.logger.logDebug('exit calculateViewFrustum');
-      return this;
-    }
-    if(!this.map) {
-      // need map for world up direction
-      this.logger.logError('map undefined');
-      this.logger.logDebug('exit calculateViewFrustum');
-      return this;
-    }
     this.calculateCameraDirections();
-    this.viewFrustum = new Frustum().calculate(this);
+    this.viewFrustum = new Frustum().calculate(
+      this.horizontalFieldOfView,
+      this.viewPortAspectRatio,
+      this.viewPortDistance,
+      this.visibleDistance,
+      this.cameraPosition,
+      this.viewPortCenterPosition,
+      this.zDirection,
+      this.xDirection,
+      this.yDirection
+    );
     this.logger.logDebug('exit calculateViewFrustum');
     return this;
   }
