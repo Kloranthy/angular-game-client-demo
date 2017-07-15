@@ -1,16 +1,13 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
-
-import { Wall } from './wall';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 export class Tile {
-  logger: Logger = LoggingService.getLogger('Tile');
+  private logger: Logger = LoggingService.getLogger('Tile');
 
   tileId: string;
   // todo have multiple sprites, retrieve based on view angle?
   image: string;
   // todo proper entity-location interaction
-  wall: Wall;
 
   constructor() {
     this.logger.logDebug('enter constructor');

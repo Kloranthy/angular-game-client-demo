@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LoggingService } from './service/logging.service';
+import { ApiService } from './service/api.service';
 
 @NgModule({
   imports: [
     CommonModule
   ],
   declarations: [],
-  providers: [ LoggingService ]
+  providers: [ ApiService ]
 })
 export class CoreModule {}

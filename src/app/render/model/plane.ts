@@ -1,10 +1,10 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Vector3 } from './vector3';
 
 export class Plane {
-  logger: Logger = LoggingService.getLogger('Plane');
+  private logger: Logger = LoggingService.getLogger('Plane');
 
   normal: Vector3; // the normal vector of the plane
   distance: number; // the distance of the normal from the origin
@@ -43,7 +43,7 @@ export class Plane {
     u = pointC.clone()
       .subtractVector(pointA);
     this.normal = v.cross(u);
-    this.distance = this.normal.dot(pointA);
+    this.distance = -this.normal.dot(pointA);
     this.normalize();
     this.logger.logVerbose(
       'normal ('
@@ -101,13 +101,16 @@ export class Plane {
     this.logger.logDebug(
       'enter distanceBetweenPlaneAndPoint'
     );
-    let dotProduct: number;
-    dotProduct = this.normal.dot(point) + this.distance;
-    this.logger.logVerbose('distance: ' + dotProduct);
+    let distanceBetweenPlaneAndPoint: number;
+    distanceBetweenPlaneAndPoint = this.normal.dot(point)
+    + this.distance;
+    this.logger.logVerbose(
+      'distanceBetweenPlaneAndPoint: ' + distanceBetweenPlaneAndPoint
+    );
     this.logger.logDebug(
       'exit distanceBetweenPlaneAndPoint'
     );
-    return dotProduct;
+    return distanceBetweenPlaneAndPoint;
   }
 
   clone(): Plane {

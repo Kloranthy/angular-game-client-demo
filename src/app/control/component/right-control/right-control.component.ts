@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 
-import { LoggingService } from '../../../core/service/logging.service';
-import { Logger } from '../../../core/model/logger';
+import { LoggingService } from '../../../log/service/logging.service';
+import { Logger } from '../../../log/model/logger';
 
 @Component({
   selector: 'right-control',
@@ -9,7 +9,7 @@ import { Logger } from '../../../core/model/logger';
   styleUrls: ['./right-control.component.css']
 })
 export class RightControlComponent {
-  logger: Logger = LoggingService.getLogger('RightControlComponent');
+  private logger: Logger = LoggingService.getLogger('RightControlComponent');
 
   @Output() onControlPressed;
   width: number;

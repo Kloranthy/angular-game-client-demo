@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Camera } from '../../render/model/camera';
 import { Map } from '../../render/model/map';
+import { RenderService } from '../../render/service/render.service';
 
 @Injectable()
 export class InputProcessorService {
-  logger: Logger = LoggingService.getLogger('InputProcessorService');
+  private logger: Logger = LoggingService.getLogger('InputProcessorService');
 
   // putting camera and map in here for now
   // so that input processor has access
@@ -18,7 +19,9 @@ export class InputProcessorService {
   map: Map;
 
 
-  constructor() {
+  constructor(
+    private renderService: RenderService
+  ) {
     this.logger.logDebug('enter constructor');
     this.logger.logDebug('exit constructor');
   }
@@ -64,8 +67,8 @@ export class InputProcessorService {
         this.targetRight();
         break;
       case 'render test' :
-        if(this.camera) {
-          this.camera.renderFrame();
+        if(this.renderService) {
+          this.renderService.renderFrame();
         }
         else {
           this.logger.logError('camera not set in input processor');

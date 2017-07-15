@@ -1,8 +1,8 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 export class Vector3 {
-  logger: Logger = LoggingService.getLogger('Vector3');
+  private logger: Logger = LoggingService.getLogger('Vector3');
   x: number;
   y: number;
   z: number;

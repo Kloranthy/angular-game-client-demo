@@ -1,5 +1,5 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Camera } from './camera';
 import { Frustum } from './frustum';
@@ -8,7 +8,7 @@ import { Vector3 } from './vector3';
 import { Wall } from './wall';
 
 export class Map {
-  logger: Logger =  LoggingService.getLogger('Map');
+  private logger: Logger =  LoggingService.getLogger('Map');
   tiles: Tile[][];
   width: number;
   length: number;
@@ -81,23 +81,78 @@ export class Map {
     let viewPortDistance: number;
     let viewPortCenterPosition: Vector3;
 
-    cameraPosition = new Vector3();
-    cameraPosition.setFromValues(
-      20, 20, 2
-    );
+    camera.setMap(this);
+
+    cameraPosition = new Vector3()
+      .setFromValues(
+        20, 20, 5
+      );
 
     camera.setCameraPosition(cameraPosition);
 
     viewPortDistance = camera.getViewPortDistance();
 
-    viewPortCenterPosition = new Vector3();
-    viewPortCenterPosition.setFromValues(
-      20, 20 + viewPortDistance, 2
-    );
+    viewPortCenterPosition = new Vector3().setFromValues(
+        20, 20 + viewPortDistance, 5
+      );
 
     camera.setViewPortCenterPosition(viewPortCenterPosition);
 
-    camera.calculateViewFrustum();
+    let frustum: Frustum;
+    frustum = camera.getViewFrustum();
+
+    let point: Vector3;
+    let result: boolean;
+    this.logger.logVerbose('testing a point inside the frustum');
+    point = new Vector3()
+      .setFromValues(
+        20, 35, 5
+      );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the left plane of the frustum');
+    point.setFromValues(
+      -500, 30, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the right plane of the frustum');
+    point.setFromValues(
+      500, 30, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the top plane of the frustum');
+    point.setFromValues(
+      20, 50, 500
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the bottom plane of the frustum');
+    point.setFromValues(
+      20, 50, -500
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the near plane of the frustum');
+    point.setFromValues(
+      20, 24, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the far plane of the frustum');
+    point.setFromValues(
+      20, 500, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
     this.logger.logDebug('exit placeCameraHardCodedDemo');
   }
 
@@ -165,6 +220,18 @@ export class Map {
       this.logger.logVerbose(line);
     }
     this.logger.logDebug('exit printMap');
+  }
+
+  getUpDirection(): Vector3 {
+    this.logger.logDebug('enter getUpDirection');
+    this.logger.logVerbose(
+      'upDirection: ('
+      + this.zDirection.x + ','
+      + this.zDirection.y + ','
+      + this.zDirection.z + ')'
+    );
+    this.logger.logDebug('exit getUpDirection');
+    return this.zDirection;
   }
 
   getTileAt(
