@@ -24,7 +24,9 @@ export class RenderService {
   */
   scene: Scene;
 
-  // the canvas used for double buffering
+  /**
+    the canvas used for double buffering
+  */
   bufferCanvas: HTMLCanvasElement;
   /**
     the width of the buffer canvas
@@ -34,10 +36,14 @@ export class RenderService {
     the height of the buffer canvas
   */
   bufferCanvasHeight: number;
-  // the rendering context of the buffer canvas
+  /**
+    the rendering context of the buffer canvas
+  */
   bufferCanvasRenderContext: CanvasRenderingContext2D;
 
-  // the canvas shown on the screen
+  /**
+    the canvas shown on the screen
+  */
   displayCanvas: HTMLCanvasElement;
   /**
     the width of the display canvas
@@ -47,7 +53,9 @@ export class RenderService {
     the height of the display canvas
   */
   displayCanvasHeight: number;
-  // the rendering context of the display canvas
+  /**
+    the rendering context of the display canvas
+  */
   displayCanvasRenderContext: CanvasRenderingContext2D;
 
 
@@ -98,7 +106,9 @@ export class RenderService {
 
   // old stuff
 
-
+  /**
+    renders a frame
+  */
   renderFrame(): void {
     this.logger.logDebug('enter renderFrame');
     this.clearBuffer();

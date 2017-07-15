@@ -240,6 +240,15 @@ export class Camera {
   // todo look at position (from direction?)
 
   // get
+  getHorizontalFieldOfView(): number {
+    this.logger.logDebug('enter getHorizontalFieldOfView');
+    this.logger.logVerbose(
+      'horizontalFieldOfView: ' + this.horizontalFieldOfView
+    );
+    this.logger.logDebug('exit getHorizontalFieldOfView');
+    return this.horizontalFieldOfView;
+  }
+
   getViewPortAspectRatio(): number {
     this.logger.logDebug('enter getViewPortAspectRatio');
     this.logger.logVerbose(
@@ -259,6 +268,18 @@ export class Camera {
   );
     this.logger.logDebug('exit getViewPortCenterPosition');
     return this.viewPortCenterPosition;
+  }
+
+  getCameraPosition(): Vector3 {
+    this.logger.logDebug('enter getCameraPosition');
+    this.logger.logVerbose(
+      'cameraPosition: ('
+      + this.cameraPosition.x + ','
+      + this.cameraPosition.y + ','
+      + this.cameraPosition.z + ')'
+    );
+    this.logger.logDebug('exit getCameraPosition');
+    return this.cameraPosition;
   }
 
   getViewPortDistance(): number {

@@ -6,7 +6,7 @@ import { Plane } from './plane';
 import { Vector3 } from './vector3';
 
 export class Frustum {
-  logger: Logger = LoggingService.getLogger('Frustum');
+  private logger: Logger = LoggingService.getLogger('Frustum');
   // points
   nearTopLeftPoint: Vector3;
   nearTopRightPoint: Vector3;
@@ -151,6 +151,7 @@ export class Frustum {
     return true;
   }
 
+  // NOTE: still broken despite what the linter says! many variables are not defined as I do not have getters made/called!
   private calculatePoints(camera: Camera): Frustum {
     this.logger.logDebug('enter calculatePoints');
     // camera
@@ -166,13 +167,31 @@ export class Frustum {
     //
     let nearViewPortWidth: number;
     let nearViewPortHeight: number;
+    let farViewCenter: Vector3;
     let farViewPortWidth: number;
     let farViewPortHeight: number;
     //
+    cameraPosition = camera.getCameraPosition();
+    horizontalFieldOfView = camera.getHorizontalFieldOfView();
+    viewPortAspectRatio = camera.getViewPortAspectRatio();
+    // NOTE: these are half width and height???
+    nearViewPortWidth = Math.tan(horizontalFieldOfView / 2)
+      * viewPortDistance;
+    nearViewPortHeight = nearViewPortWidth / viewPortAspectRatio;
+
+    farViewPortWidth = Math.tan(horizontalFieldOfView / 2)
+      * (viewPortDistance + visibleDistance);
+    farViewPortHeight = farViewPortWidth / viewPortAspectRatio;
 
     this.nearTopLeftPoint = viewPortCenterPosition.clone()
-      .addVector(nearLeftMovement)
-      .addVector(nearTopMovement);
+      .subtractVector(
+        cameraRightDirection.clone()
+          .scale(nearViewPortWidth)
+      )
+      .addVector(
+        cameraUpDirection.clone()
+          .scale(nearViewPortHeight)
+      );
     this.logger.logVerbose(
       'nearTopLeftPoint ('
       + this.nearTopLeftPoint.x + ', '
@@ -181,8 +200,14 @@ export class Frustum {
     );
 
     this.nearTopRightPoint = viewPortCenterPosition.clone()
-      .addVector(nearLeftMovement)
-      .addVector(nearTopMovement);
+      .addVector(
+        cameraRightDirection.clone()
+          .scale(nearViewPortWidth)
+      )
+      .addVector(
+        cameraUpDirection.clone()
+          .scale(nearViewPortHeight)
+      );
     this.logger.logVerbose(
       'nearTopRightPoint ('
       + this.nearTopRightPoint.x + ', '
@@ -191,8 +216,14 @@ export class Frustum {
     );
 
     this.nearBottomLeftPoint = viewPortCenterPosition.clone()
-      .addVector(nearLeftMovement)
-      .addVector(nearBottomMovement);
+      .subtractVector(
+        cameraRightDirection.clone()
+          .scale(nearViewPortWidth)
+      )
+      .subtractVector(
+        cameraUpDirection.clone()
+          .scale(nearViewPortHeight)
+      );
     this.logger.logVerbose(
       'nearBottomLeftPoint ('
       + this.nearBottomLeftPoint.x + ', '
@@ -201,8 +232,14 @@ export class Frustum {
     );
 
     this.nearBottomRightPoint = viewPortCenterPosition.clone()
-      .addVector(nearRightMovement)
-      .addVector(nearBottomMovement);
+      .addVector(
+        cameraRightDirection.clone()
+          .scale(nearViewPortWidth)
+      )
+      .subtractVector(
+        cameraUpDirection.clone()
+          .scale(nearViewPortHeight)
+      );
     this.logger.logVerbose(
       'nearBottomRightPoint ('
       + this.nearBottomRightPoint.x + ', '
@@ -211,10 +248,10 @@ export class Frustum {
     );
 
     // now extend the visible distance out from the view port center
-    farMovement = cameraForwardDirection.clone()
-      .scale(visibleDistance);
     farViewCenter = viewPortCenterPosition.clone()
-      .addVector(farMovement);
+      .addVector(cameraForwardDirection.clone()
+        .scale(visibleDistance)
+      );
     this.logger.logVerbose(
       'farViewCenter ('
       + farViewCenter.x + ', '
@@ -222,28 +259,16 @@ export class Frustum {
       + farViewCenter.z + ')'
     );
 
-    // now scale the view port dimensions
-    scaledViewPortWidth = viewPortWidth
-      / viewPortDistance
-      * (viewPortDistance + visibleDistance);
-    scaledViewPortHeight = viewPortHeight
-      / viewPortDistance
-      * (viewPortDistance + visibleDistance);
-
-    // now calculate the far direction movements
-    farLeftMovement = leftDirection.clone()
-      .scale(scaledViewPortWidth / 2);
-    farRightMovement = rightDirection.clone()
-      .scale(scaledViewPortWidth / 2);
-    farTopMovement = upDirection.clone()
-      .scale(scaledViewPortHeight / 2);
-    farBottomMovement = downDirection.clone()
-      .scale(scaledViewPortHeight / 2);
-
     // now use these to find the far points
     this.farTopLeftPoint = farViewCenter.clone()
-      .addVector(farLeftMovement)
-      .addVector(farTopMovement);
+      .subtractVector(
+        cameraRightDirection.clone()
+          .scale(farViewPortWidth)
+      )
+      .addVector(
+        cameraUpDirection.clone()
+          .scale(farViewPortHeight)
+      );
     this.logger.logVerbose(
       'farTopLeftPoint ('
       + this.farTopLeftPoint.x + ', '
@@ -252,8 +277,14 @@ export class Frustum {
     );
 
     this.farTopRightPoint = farViewCenter.clone()
-      .addVector(farRightMovement)
-      .addVector(farTopMovement);
+      .addVector(
+        cameraRightDirection.clone()
+          .scale(farViewPortWidth)
+      )
+      .addVector(
+        cameraUpDirection.clone()
+          .scale(farViewPortHeight)
+      );
     this.logger.logVerbose(
       'farTopRightPoint ('
       + this.farTopRightPoint.x + ', '
@@ -262,8 +293,14 @@ export class Frustum {
     );
 
     this.farBottomLeftPoint = farViewCenter.clone()
-      .addVector(farLeftMovement)
-      .addVector(farBottomMovement);
+      .subtractVector(
+        cameraRightDirection.clone()
+          .scale(farViewPortWidth)
+      )
+      .subtractVector(
+        cameraUpDirection.clone()
+          .scale(farViewPortHeight)
+      );
     this.logger.logVerbose(
       'farBottomLeftPoint ('
       + this.farBottomLeftPoint.x + ', '
@@ -272,8 +309,14 @@ export class Frustum {
     );
 
     this.farBottomRightPoint = farViewCenter.clone()
-      .addVector(farRightMovement)
-      .addVector(farBottomMovement);
+      .addVector(
+        cameraRightDirection.clone()
+          .scale(farViewPortWidth)
+      )
+      .subtractVector(
+        cameraUpDirection.clone()
+          .scale(farViewPortHeight)
+      );
     this.logger.logVerbose(
       'farBottomRightPoint ('
       + this.farBottomRightPoint.x + ', '
