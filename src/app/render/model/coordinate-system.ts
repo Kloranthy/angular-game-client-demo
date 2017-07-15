@@ -16,6 +16,42 @@ export class CoordinateSystem {
     this.logger.logDebug('exit constructor');
   }
 
+  setXDirection(xDirection: Vector3): void {
+    this.logger.logDebug('enter setXDirection');
+    this.xDirection = xDirection;
+    this.logger.logVerbose(
+      'xDirection: ('
+      + this.xDirection.x + ', '
+      + this.xDirection.y + ', '
+      + this.xDirection.z + ')'
+    );
+    this.logger.logDebug('exit setXDirection');
+  }
+
+  setYDirection(yDirection: Vector3): void {
+    this.logger.logDebug('enter setYDirection');
+    this.yDirection = yDirection;
+    this.logger.logVerbose(
+      'yDirection: ('
+      + this.yDirection.x + ', '
+      + this.yDirection.y + ', '
+      + this.yDirection.z + ')'
+    );
+    this.logger.logDebug('exit setYDirection');
+  }
+
+  setZDirection(zDirection: Vector3): void {
+    this.logger.logDebug('enter setZDirection');
+    this.zDirection = zDirection;
+    this.logger.logVerbose(
+      'zDirection: ('
+      + this.zDirection.x + ', '
+      + this.zDirection.y + ', '
+      + this.zDirection.z + ')'
+    );
+    this.logger.logDebug('exit setZDirection');
+  }
+
   convertFromWorldToCamera(
     worldVector: Vector3,
     camera: Camera

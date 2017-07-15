@@ -96,55 +96,79 @@ export class Frustum {
     return this;
   }
 
-  calculatePoints(camera: Camera): Frustum {
+  clone(): Frustum {
+    this.logger.logDebug('enter clone');
+    let clone: Frustum;
+    clone = new Frustum()
+      .setFromFrustum(this);
+    this.logger.logDebug('exit clone');
+    return clone;
+  }
+
+  getPoints(): Vector3[] {
+    this.logger.logDebug('enter getPoints');
+    let points: Vector3[];
+    points = [
+      this.nearTopLeftPoint,
+      this.nearTopRightPoint,
+      this.nearBottomLeftPoint,
+      this.nearBottomRightPoint,
+      this.farTopLeftPoint,
+      this.farTopRightPoint,
+      this.farBottomLeftPoint,
+      this.farBottomRightPoint
+    ];
+    this.logger.logDebug('exit getPoints');
+    return points;
+  }
+
+  getPlanes(): Plane[] {
+    this.logger.logDebug('enter getPlanes');
+    let planes: Plane[];
+    planes = [
+      this.leftPlane,
+      this.rightPlane,
+      this.topPlane,
+      this.bottomPlane,
+      this.nearPlane,
+      this.farPlane
+    ];
+    this.logger.logDebug('exit getPlanes');
+    return planes;
+  }
+
+  containsPoint(point: Vector3): boolean {
+    this.logger.logDebug('enter containsPoint');
+    this.logger.logVerbose('point: ' + point);
+    let planes: Plane[];
+    planes = this.getPlanes();
+    for(let plane of planes) {
+      if(plane.distanceBetweenPlaneAndPoint(point) < 0) {
+        return false;
+      }
+    }
+    this.logger.logDebug('exit containsPoint');
+    return true;
+  }
+
+  private calculatePoints(camera: Camera): Frustum {
     this.logger.logDebug('enter calculatePoints');
+    // camera
     let cameraPosition: Vector3;
     let viewPortCenterPosition: Vector3;
-    let viewPortWidth: number; // the width of the view port at the view port distance
-    let viewPortHeight: number; // the height of the view port at the view port distance
-    let viewPortDistance: number; // the distance to the near plane
-    let visibleDistance: number; // the distance visible beyond the near plane
-    let cameraDirection: Vector3;
-    let upDirection: Vector3;
-    let downDirection: Vector3;
-    let leftDirection: Vector3;
-    let rightDirection: Vector3;
-    let nearLeftMovement: Vector3;
-    let nearRightMovement: Vector3;
-    let nearTopMovement: Vector3;
-    let nearBottomMovement: Vector3;
-    let farMovement: Vector3; // the transformation from the near plane to the far plane
-    let farViewCenter: Vector3;
-    let scaledViewPortWidth: number; // the width of the view port at the max visible distance
-    let scaledViewPortHeight: number; // the height of the view port at the max visible distance
-    let farLeftMovement: Vector3;
-    let farRightMovement: Vector3;
-    let farTopMovement: Vector3;
-    let farBottomMovement: Vector3;
-
-    cameraPosition = camera.cameraPosition;
-    viewPortCenterPosition = camera.viewPortCenterPosition;
-    viewPortWidth = camera.viewPortWidth;
-    viewPortHeight = camera.viewPortHeight;
-    viewPortDistance = camera.getViewPortDistance();
-    visibleDistance = camera.visibleDistance;
-    // start by calculating the camera direction
-    cameraDirection = camera.calculateCameraDirection();
-    // use the camera direction to calculate the 4 perpendicular directions
-    upDirection = camera.calculateUpDirection(cameraDirection);
-    downDirection = camera.calculateDownDirection(cameraDirection);
-    leftDirection = camera.calculateLeftDirection(cameraDirection);
-    rightDirection = camera.calculateRightDirection(cameraDirection);
-
-    // use these directions and the view port dimensions to find the near points
-    nearLeftMovement = leftDirection.clone()
-      .scale(viewPortWidth / 2);
-    nearRightMovement = rightDirection.clone()
-      .scale(viewPortWidth / 2);
-    nearTopMovement = upDirection.clone()
-      .scale(viewPortHeight / 2);
-    nearBottomMovement = downDirection.clone()
-      .scale(viewPortHeight / 2);
+    let horizontalFieldOfView: number;
+    let viewPortDistance: number;
+    let visibleDistance: number;
+    let viewPortAspectRatio: number;
+    let cameraForwardDirection: Vector3;
+    let cameraRightDirection: Vector3;
+    let cameraUpDirection: Vector3;
+    //
+    let nearViewPortWidth: number;
+    let nearViewPortHeight: number;
+    let farViewPortWidth: number;
+    let farViewPortHeight: number;
+    //
 
     this.nearTopLeftPoint = viewPortCenterPosition.clone()
       .addVector(nearLeftMovement)
@@ -187,7 +211,7 @@ export class Frustum {
     );
 
     // now extend the visible distance out from the view port center
-    farMovement = cameraDirection.clone()
+    farMovement = cameraForwardDirection.clone()
       .scale(visibleDistance);
     farViewCenter = viewPortCenterPosition.clone()
       .addVector(farMovement);
@@ -260,7 +284,7 @@ export class Frustum {
     return this;
   }
 
-  calculatePlanes(): Frustum {
+  private calculatePlanes(): Frustum {
     this.logger.logDebug('enter calculatePlanes');
     this.logger.logVerbose('leftPlane');
     this.leftPlane = new Plane()
@@ -308,58 +332,4 @@ export class Frustum {
     return this;
   }
 
-  clone(): Frustum {
-    this.logger.logDebug('enter clone');
-    let clone: Frustum;
-    clone = new Frustum()
-      .setFromFrustum(this);
-    this.logger.logDebug('exit clone');
-    return clone;
-  }
-
-  getPoints(): Vector3[] {
-    this.logger.logDebug('enter getPoints');
-    let points: Vector3[];
-    points = [
-      this.nearTopLeftPoint,
-      this.nearTopRightPoint,
-      this.nearBottomLeftPoint,
-      this.nearBottomRightPoint,
-      this.farTopLeftPoint,
-      this.farTopRightPoint,
-      this.farBottomLeftPoint,
-      this.farBottomRightPoint
-    ];
-    this.logger.logDebug('exit getPoints');
-    return points;
-  }
-
-  getPlanes(): Plane[] {
-    this.logger.logDebug('enter getPlanes');
-    let planes: Plane[];
-    planes = [
-      this.leftPlane,
-      this.rightPlane,
-      this.topPlane,
-      this.bottomPlane,
-      this.nearPlane,
-      this.farPlane
-    ];
-    this.logger.logDebug('exit getPlanes');
-    return planes;
-  }
-
-  containsPoint(point: Vector3): boolean {
-    this.logger.logDebug('enter containsPoint');
-    this.logger.logVerbose('point: ' + point);
-    let planes: Plane[];
-    planes = this.getPlanes();
-    for(let plane of planes) {
-      if(plane.distanceBetweenPlaneAndPoint(point) < 0) {
-        return false;
-      }
-    }
-    this.logger.logDebug('exit containsPoint');
-    return true;
-  }
 }
