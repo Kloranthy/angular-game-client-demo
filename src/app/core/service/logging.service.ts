@@ -33,6 +33,7 @@ export class LoggingService {
     this.whiteListedSources = [];
     this.blackListedSources = [];
     // initial whitelist configuration
+    this.whiteListedSource('Map');
     this.whiteListedSource('Frustum');
     this.whiteListedSource('Plane');
     // initial blacklist configuration

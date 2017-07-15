@@ -163,37 +163,37 @@ export class Frustum {
       + point.y + ','
       + point.z + ')'
     );
-    this.logger.logVerbose('testing left plane');
+    //this.logger.logVerbose('testing left plane');
     if(this.leftPlane.distanceBetweenPlaneAndPoint(point) < 0) {
       this.logger.logVerbose('point outside left plane');
       this.logger.logDebug('exit containsPoint');
       return false;
     }
-    this.logger.logVerbose('testing right plane');
+    //this.logger.logVerbose('testing right plane');
     if(this.rightPlane.distanceBetweenPlaneAndPoint(point) < 0) {
       this.logger.logVerbose('point outside right plane');
       this.logger.logDebug('exit containsPoint');
       return false;
     }
-    this.logger.logVerbose('testing top plane');
+    //this.logger.logVerbose('testing top plane');
     if(this.topPlane.distanceBetweenPlaneAndPoint(point) < 0) {
       this.logger.logVerbose('point outside top plane');
       this.logger.logDebug('exit containsPoint');
       return false;
     }
-    this.logger.logVerbose('testing bottom plane');
+    //this.logger.logVerbose('testing bottom plane');
     if(this.bottomPlane.distanceBetweenPlaneAndPoint(point) < 0) {
       this.logger.logVerbose('point outside bottom plane');
       this.logger.logDebug('exit containsPoint');
       return false;
     }
-    this.logger.logVerbose('testing near plane');
+    //this.logger.logVerbose('testing near plane');
     if(this.nearPlane.distanceBetweenPlaneAndPoint(point) < 0) {
       this.logger.logVerbose('point outside near plane');
       this.logger.logDebug('exit containsPoint');
       return false;
     }
-    this.logger.logVerbose('testing far plane');
+    //this.logger.logVerbose('testing far plane');
     if(this.farPlane.distanceBetweenPlaneAndPoint(point) < 0) {
       this.logger.logVerbose('point outside far plane');
       this.logger.logDebug('exit containsPoint');

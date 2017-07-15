@@ -103,18 +103,55 @@ export class Map {
 
     let point: Vector3;
     let result: boolean;
+    this.logger.logVerbose('testing a point inside the frustum');
     point = new Vector3()
       .setFromValues(
-        20, 35, 2
+        20, 35, 5
       );
     result = frustum.containsPoint(point);
-    console.log('result: ' + result);
+    this.logger.logVerbose('result: ' + result);
 
+    this.logger.logVerbose('testing a point outside the left plane of the frustum');
     point.setFromValues(
-      50, 50, 3
+      -500, 30, 5
     );
     result = frustum.containsPoint(point);
-    console.log('result: ' + result);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the right plane of the frustum');
+    point.setFromValues(
+      500, 30, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the top plane of the frustum');
+    point.setFromValues(
+      20, 50, 500
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the bottom plane of the frustum');
+    point.setFromValues(
+      20, 50, -500
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the near plane of the frustum');
+    point.setFromValues(
+      20, 24, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
+
+    this.logger.logVerbose('testing a point outside the far plane of the frustum');
+    point.setFromValues(
+      20, 500, 5
+    );
+    result = frustum.containsPoint(point);
+    this.logger.logVerbose('result: ' + result);
 
     this.logger.logDebug('exit placeCameraHardCodedDemo');
   }
