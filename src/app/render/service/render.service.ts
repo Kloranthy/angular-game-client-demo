@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { ApiService } from '../../core/service/api.service';
 

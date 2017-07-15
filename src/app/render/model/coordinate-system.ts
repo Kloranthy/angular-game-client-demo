@@ -1,11 +1,11 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Camera } from './camera';
 import { Vector3 } from './vector3';
 
 export class CoordinateSystem {
-  logger: Logger = LoggingService.getLogger('CoordinateSystem');
+  private logger: Logger = LoggingService.getLogger('CoordinateSystem');
 
   xDirection: Vector3; // represents positive movement along the x axis
   yDirection: Vector3; // represents positive movement along the y axis

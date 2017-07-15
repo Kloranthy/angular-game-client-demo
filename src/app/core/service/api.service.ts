@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 
-import { LoggingService } from './logging.service';
-import { Logger } from '../model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 /**
   the API Service receives calls from the domain services and forwards them

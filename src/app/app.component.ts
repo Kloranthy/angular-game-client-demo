@@ -2,8 +2,8 @@ import {
   Component, ElementRef, AfterViewInit, ViewChild
 } from '@angular/core';
 
-import { LoggingService } from './core/service/logging.service';
-import { Logger } from './core/model/logger';
+import { LoggingService } from './log/service/logging.service';
+import { Logger } from './log/model/logger';
 
 import { LeftControlComponent } from './control/component/left-control/left-control.component';
 import { RightControlComponent } from './control/component/right-control/right-control.component';
@@ -20,7 +20,7 @@ import { Map } from './render/model/map';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-  logger: Logger = LoggingService.getLogger('AppComponent');
+  private logger: Logger = LoggingService.getLogger('AppComponent');
   windowWidth: number; // the width of the window
   windowHeight: number; // the height of the window
 
@@ -126,10 +126,12 @@ export class AppComponent implements AfterViewInit {
       ),
       0
     );
+    /*
     setTimeout(
       () => this.canvas.viewPortAspectRatio = this.camera.viewPortAspectRatio,
       0
     );
+    */
     setTimeout(
       () => this.canvas.resize(
         this.canvasWidth,

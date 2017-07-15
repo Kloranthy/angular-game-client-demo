@@ -1,5 +1,5 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Camera } from './camera';
 import { Frustum } from './frustum';
@@ -8,7 +8,7 @@ import { Vector3 } from './vector3';
 import { Wall } from './wall';
 
 export class Map {
-  logger: Logger =  LoggingService.getLogger('Map');
+  private logger: Logger =  LoggingService.getLogger('Map');
   tiles: Tile[][];
   width: number;
   length: number;

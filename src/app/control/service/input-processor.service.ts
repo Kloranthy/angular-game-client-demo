@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Camera } from '../../render/model/camera';
 import { Map } from '../../render/model/map';
@@ -9,7 +9,7 @@ import { RenderService } from '../../render/service/render.service';
 
 @Injectable()
 export class InputProcessorService {
-  logger: Logger = LoggingService.getLogger('InputProcessorService');
+  private logger: Logger = LoggingService.getLogger('InputProcessorService');
 
   // putting camera and map in here for now
   // so that input processor has access

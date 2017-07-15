@@ -1,5 +1,5 @@
-import { LoggingService } from '../../core/service/logging.service';
-import { Logger } from '../../core/model/logger';
+import { LoggingService } from '../../log/service/logging.service';
+import { Logger } from '../../log/model/logger';
 
 import { Camera } from './camera';
 import { Plane } from './plane';

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
-import { LoggingService } from '../../../core/service/logging.service';
-import { Logger } from '../../../core/model/logger';
+import { LoggingService } from '../../../log/service/logging.service';
+import { Logger } from '../../../log/model/logger';
 
 @Component({
   selector: 'app-camera-control',
@@ -9,7 +9,7 @@ import { Logger } from '../../../core/model/logger';
   styleUrls: ['./camera-control.component.css']
 })
 export class CameraControlComponent {
-  logger: Logger = LoggingService.getLogger('CameraControlComponent');
+  private logger: Logger = LoggingService.getLogger('CameraControlComponent');
 
   constructor() {
     this.logger.logDebug('enter constructor');
