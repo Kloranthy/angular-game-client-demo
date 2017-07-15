@@ -1,3 +1,32 @@
-<p>
-  camera-control works!
-</p>
+<div>
+  <h2>
+    Field Of View
+  </h2>
+  <div>
+    <button (click)="decreaseFieldOfView()">
+      -
+    </button>
+    <p>
+      {{horizontalFieldOfView}}
+    </p>
+    <button (click)="increaseFieldOfView()">
+      +
+    </button>
+  </div>
+</div>
+<div>
+  <h2>
+    Aspect Ratio
+  </h2>
+  <div>
+    <button (click)="decreaseViewPortAspectRatio()">
+      -
+    </button>
+    <p>
+      {{viewPortAspectRatio}}
+    </p>
+    <button (click)="increaseViewPortAspectRatio()">
+      +
+    </button>
+  </div>
+</div>

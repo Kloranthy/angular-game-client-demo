@@ -16,4 +16,23 @@ export class CameraControlComponent {
     this.logger.logDebug('exit constructor');
   }
 
+  decreaseFieldOfView(): void {
+    this.logger.logDebug('enter decreaseFieldOfView');
+    this.logger.logDebug('exit decreaseFieldOfView');
+  }
+
+  increaseFieldOfView(): void {
+    this.logger.logDebug('enter increaseFieldOfView');
+    this.logger.logDebug('exit increaseFieldOfView');
+  }
+
+  decreaseViewPortAspectRatio(): void {
+    this.logger.logDebug('enter decreaseViewPortAspectRatio');
+    this.logger.logDebug('exit decreaseViewPortAspectRatio');
+  }
+
+  increaseViewPortAspectRatio(): void {
+    this.logger.logDebug('enter increaseViewPortAspectRatio');
+    this.logger.logDebug('exit increaseViewPortAspectRatio');
+  }
 }

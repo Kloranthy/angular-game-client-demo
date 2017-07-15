@@ -73,6 +73,28 @@ export class RenderService {
     this.logger.logDebug('exit setDisplayCanvas');
   }
 
+  resizeDisplayCanvas(
+    width: number,
+    height: number
+  ): void {
+    this.logger.logDebug('enter resizeDisplayCanvas');
+    let displayCanvasAspectRatio: number;
+    let viewPortAspectRatio: number;
+    displayCanvasAspectRatio = width / height;
+    viewPortAspectRatio = this.camera.getViewPortAspectRatio();
+    if(displayCanvasAspectRatio > viewPortAspectRatio) {
+      this.displayCanvasWidth = height * viewPortAspectRatio;
+      this.displayCanvasHeight = height;
+    }
+    else {
+      this.displayCanvasWidth = width;
+      this.displayCanvasHeight = width / viewPortAspectRatio;
+    }
+    this.displayCanvas.width = this.displayCanvasWidth;
+    this.displayCanvas.height = this.displayCanvasHeight;
+    this.logger.logDebug('exit resizeDisplayCanvas');
+  }
+
   /*
   todo planning for render service
   what responsibilities to have?
