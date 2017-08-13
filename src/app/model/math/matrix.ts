@@ -1,4 +1,4 @@
-import { element } from 'protractor';
+
 export class Matrix {
   protected rows: number;
   protected columns: number;
@@ -95,6 +95,10 @@ export class Matrix {
 
   public getColumns(): number {
     return this.columns;
+  }
+
+  public isSquare(): boolean {
+    return this.rows === this.columns;
   }
 
   public setFromMatrix( matrix: Matrix ): Matrix {
@@ -287,48 +291,38 @@ export class Matrix {
   }
 
   public getInverse(): Matrix {
-    if ( this.rows !== this.columns ) {
+    if ( !this.isSquare() ) {
       return undefined;
     }
     if ( this.rows <= 1 ) {
       return undefined;
     }
 
-    const minors: Matrix = new Matrix(
+    const cofactors: Matrix = new Matrix(
       this.rows,
       this.columns
     );
-    for (
-      let imc = 0;
-      imc < minors.getColumns();
-      imc++
-    ) {
-      minors.setElement(
-        0, imc,
-        this.getMinorMatrixFor(
-          0, imc
-        ).getDeterminant()
-      )
-    }
 
     let determinant: number;
     determinant = 0;
+
     for (
       let imc = 0;
-      imc < minors.getColumns();
+      imc < cofactors.getColumns();
       imc++
     ) {
+      cofactors.setElement(
+        0, imc,
+        this.getCofactorFor(
+          0, imc
+        )
+      );
       determinant = determinant
-        + minors.getElement( 0, imc );
+        + cofactors.getElement( 0, imc );
     }
 
-    const inverse: Matrix = new Matrix(
-      this.columns,
-      this.rows
-    );
-
     if ( determinant === 0 ) {
-      return inverse;
+      return undefined;
     }
 
     for (
@@ -341,19 +335,18 @@ export class Matrix {
         imc < this.columns;
         imc++
       ) {
-        minors.setElement(
+        cofactors.setElement(
           imr, imc,
-          this.getMinorMatrixFor( imr, imc )
-              .getDeterminant()
+          this.getCofactorFor(
+            imr, imc
+          )
         );
       }
     }
 
-    inverse.setFromMatrix(
-      minors
-        .getTranspose()
-        .multiplyScalar( 1 / determinant )
-    );
+    const inverse: Matrix = cofactors
+      .getTranspose()
+      .multiplyScalar( 1 / determinant );
 
     return inverse;
   }
@@ -397,13 +390,17 @@ export class Matrix {
   }
 
   public getDeterminant(): number {
-    let determinant: number;
-
-    if ( this.rows === 1 && this.columns === 1) {
-      return this.elements[ 0 ][ 0 ];
+    if (
+      this.rows !== this.columns
+      || this.rows <= 1
+      || this.columns <= 1
+    ) {
+      return undefined;
     }
 
-    if ( this.rows === this.columns && this.rows === 2 ) {
+    let determinant: number;
+
+    if ( this.rows === 2 ) {
       determinant
         = this.elements[ 0 ][ 0 ] * this.elements[ 1 ][ 1 ]
         - this.elements[ 0 ][ 1 ] * this.elements[ 1 ][ 0 ];
@@ -446,33 +443,6 @@ export class Matrix {
     const cofactor: number = sign * determinant;
 
     return cofactor;
-  }
-
-  protected getMatrixOfMinors(): Matrix {
-    const minors: Matrix = new Matrix(
-      this.rows,
-      this.columns
-    );
-
-    for (
-      let ir = 0;
-      ir < this.rows;
-      ir++
-    ) {
-      for (
-        let ic = 0;
-        ic < this.columns;
-        ic++
-      ) {
-        minors.setElement(
-          ir, ic,
-          this.getMinorMatrixFor( ir, ic )
-              .getDeterminant()
-        )
-      }
-    }
-
-    return minors;
   }
 
   protected getMinorMatrixFor(
