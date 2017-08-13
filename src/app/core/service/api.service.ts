@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 
-import { LoggingService } from '../../log/service/logging.service';
-import { Logger } from '../../log/model/logger';
-
 /**
   the API Service receives calls from the domain services and forwards them
   to the server or to the mock server to be handled.
@@ -11,11 +8,8 @@ import { Logger } from '../../log/model/logger';
 */
 @Injectable()
 export class ApiService {
-  private logger: Logger = LoggingService.getLogger('ApiService');
 
   constructor() {
-    this.logger.logDebug('enter constructor');
-    this.logger.logDebug('exit constructor');
   }
 
   /*
@@ -38,12 +32,5 @@ export class ApiService {
   */
 
   getScene(): void {
-    this.logger.logDebug('enter getScene');
-    // todo
-    // http request for scene
-    // receive data model (foreign key references)
-    // convert to domain model (object references)
-    // return scene
-    this.logger.logDebug('exit getScene');
   }
 }
