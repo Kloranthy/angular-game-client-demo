@@ -223,8 +223,8 @@ export class Matrix4 extends Matrix {
   }
 
   public getInverse(): Matrix4 {
-    const minor: Matrix4 = this.getMatrixOfMinors();
-    const mElements: number[][] = minor.getElements();
+    const minors: Matrix4 = this.getMatrixOfMinors();
+    const mElements: number[][] = minors.getElements();
 
     const determinant
       = this.elements[ 0 ][ 0 ] * mElements[ 0 ][ 0 ]

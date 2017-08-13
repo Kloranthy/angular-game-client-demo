@@ -61,8 +61,13 @@ export class Matrix {
     rows: number,
     columns: number
   ) {
-    this.rows = rows;
-    this.columns = columns;
+    rows <= 1
+    ? this.rows = 2
+    : this.rows = rows;
+    columns <= 1
+    ? this.columns = 2
+    : this.columns = columns;
+
     this.elements = [];
 
     for (
@@ -99,7 +104,6 @@ export class Matrix {
 
     return this;
   }
-
 
   public setFromElements( elements: number[][] ) {
     this.elements = [];
@@ -247,6 +251,7 @@ export class Matrix {
 
     return this;
   }
+
   public postMultiplyMatrix( matrix: Matrix ) {
     this.setFromMatrix(
       Matrix.multiplyMatrices( matrix, this )
@@ -255,46 +260,105 @@ export class Matrix {
     return this;
   }
 
-  // determinate
-
-  // transpose
-  getTranspose() {
-    if ( this.rows !== this.columns ) {
-      return
-    }
+  public getTranspose(): Matrix {
     const transpose: Matrix = new Matrix(
-      this.rows,
-      this.columns
+      this.columns,
+      this.rows
     );
-    const tElements: number[][] = transpose.getElements();
 
     for (
-      let ir = 0;
-      ir < this.rows;
-      ir ++
+      let itr = 0;
+      itr < this.columns;
+      itr ++
     ) {
-      tElements[ ir ] = [];
-
       for (
-        let ic = 0;
-        ic < this.columns;
-        ic++
+        let itc = 0;
+        itc < this.rows;
+        itc++
       ) {
-        tElements[ ir ][ ic ] = this.elements[ ic ][ ir ];
+        transpose.setElement(
+          itc, itr,
+          this.elements[ itr ][ itc ]
+        );
       }
     }
 
-    transpose.setElements( tElements );
-
-    return this;
+    return transpose;
   }
 
-  // inverse
+  public getInverse(): Matrix {
+    if ( this.rows !== this.columns ) {
+      return undefined;
+    }
+    if ( this.rows <= 1 ) {
+      return undefined;
+    }
 
-  // matrix of minors, cofactors
+    const minors: Matrix = new Matrix(
+      this.rows,
+      this.columns
+    );
+    for (
+      let imc = 0;
+      imc < minors.getColumns();
+      imc++
+    ) {
+      minors.setElement(
+        0, imc,
+        this.getMinorMatrixFor(
+          0, imc
+        ).getDeterminant()
+      )
+    }
 
-  // clone, equals
-  clone() {
+    let determinant: number;
+    determinant = 0;
+    for (
+      let imc = 0;
+      imc < minors.getColumns();
+      imc++
+    ) {
+      determinant = determinant
+        + minors.getElement( 0, imc );
+    }
+
+    const inverse: Matrix = new Matrix(
+      this.columns,
+      this.rows
+    );
+
+    if ( determinant === 0 ) {
+      return inverse;
+    }
+
+    for (
+      let imr = 1;
+      imr < this.rows;
+      imr++
+    ) {
+      for (
+        let imc = 0;
+        imc < this.columns;
+        imc++
+      ) {
+        minors.setElement(
+          imr, imc,
+          this.getMinorMatrixFor( imr, imc )
+              .getDeterminant()
+        );
+      }
+    }
+
+    inverse.setFromMatrix(
+      minors
+        .getTranspose()
+        .multiplyScalar( 1 / determinant )
+    );
+
+    return inverse;
+  }
+
+  public clone() {
     const clone: Matrix = new Matrix(
       this.rows,
       this.columns
@@ -303,4 +367,158 @@ export class Matrix {
     return clone;
   }
 
+  public equals( matrix: Matrix ) {
+    if (
+      this.getRows() !== matrix.getRows()
+      || this.getColumns() !== matrix.getColumns()
+    ) {
+      return false;
+    }
+
+    const mElements: number[][] = matrix.getElements();
+
+    for (
+      let ir = 0;
+      ir < this.rows;
+      ir++
+    ) {
+      for (
+        let ic = 0;
+        ic < this.columns;
+        ic++
+      ) {
+        if ( this.elements[ ir ][ ic ] !== mElements[ ir ][ ic ] ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public getDeterminant(): number {
+    let determinant: number;
+
+    if ( this.rows === 1 && this.columns === 1) {
+      return this.elements[ 0 ][ 0 ];
+    }
+
+    if ( this.rows === this.columns && this.rows === 2 ) {
+      determinant
+        = this.elements[ 0 ][ 0 ] * this.elements[ 1 ][ 1 ]
+        - this.elements[ 0 ][ 1 ] * this.elements[ 1 ][ 0 ];
+
+      return determinant;
+    }
+
+    determinant = 0;
+
+    for (
+      let ic = 0;
+      ic < this.columns;
+      ic++
+    ) {
+      determinant = determinant
+        + this.getCofactorFor( 0, ic );
+    }
+
+    return determinant;
+  }
+
+  protected getCofactorFor(
+    row: number,
+    column: number
+  ): number {
+    if ( this.rows <= 2 || this.columns <= 2 ) {
+      return undefined;
+    }
+    if ( row >= this.rows || column >= this.columns ) {
+      // error
+      return undefined;
+    }
+
+    const minor: Matrix = this.getMinorMatrixFor( row, column );
+    const determinant: number = minor.getDeterminant();
+    const sign: number = Math.pow(
+      -1,
+      row + column
+    );
+    const cofactor: number = sign * determinant;
+
+    return cofactor;
+  }
+
+  protected getMatrixOfMinors(): Matrix {
+    const minors: Matrix = new Matrix(
+      this.rows,
+      this.columns
+    );
+
+    for (
+      let ir = 0;
+      ir < this.rows;
+      ir++
+    ) {
+      for (
+        let ic = 0;
+        ic < this.columns;
+        ic++
+      ) {
+        minors.setElement(
+          ir, ic,
+          this.getMinorMatrixFor( ir, ic )
+              .getDeterminant()
+        )
+      }
+    }
+
+    return minors;
+  }
+
+  protected getMinorMatrixFor(
+    row: number,
+    column: number
+  ): Matrix {
+    if ( row >= this.rows || column >= this.columns ) {
+      // error
+      return undefined;
+    }
+
+    const minor: Matrix = new Matrix(
+      this.rows - 1,
+      this.columns - 1
+    );
+    const mRows: number = minor.getRows();
+    const mColumns: number = minor.getColumns();
+
+    for (
+      let imr = 0;
+      imr < mRows;
+      imr++
+    ) {
+      for (
+        let imc = 0;
+        imc < mColumns;
+        imc++
+      ) {
+        let r: number;
+        let c: number;
+
+        imr >= row
+          ? r = imr + 1
+          : r = imr;
+
+        imc >= column
+          ? c = imc + 1
+          : c = imc;
+
+        minor.setElement(
+          imr, imc,
+          this.elements[ r ][ c ]
+        )
+      }
+    }
+
+    return minor;
+  }
 }
