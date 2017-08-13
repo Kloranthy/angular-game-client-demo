@@ -1,22 +1,25 @@
-
+/**
+ * debating whether to add row and column operations
+ * ( add, remove, multiply, etc )
+ */
 export class Matrix {
-  protected rows: number;
-  protected columns: number;
+  protected numberOfRows: number;
+  protected numberOfColumns: number;
   protected elements: number[][];
 
   public static multiplyMatrices(
     matrixA: Matrix,
     matrixB: Matrix
   ): Matrix {
-    const mBRows: number = matrixB.getRows();
-    const mAColumns: number = matrixA.getColumns();
+    const mBRows: number = matrixB.getNumberOfRows();
+    const mAColumns: number = matrixA.getNumberOfColumns();
 
     if ( mAColumns !== mBRows ) {
       return undefined;
     }
 
-    const mARows: number = matrixA.getRows();
-    const mBColumns: number = matrixB.getColumns();
+    const mARows: number = matrixA.getNumberOfRows();
+    const mBColumns: number = matrixB.getNumberOfColumns();
 
     const matrixC: Matrix = new Matrix(
       mARows,
@@ -62,24 +65,24 @@ export class Matrix {
     columns: number
   ) {
     rows <= 1
-    ? this.rows = 2
-    : this.rows = rows;
+    ? this.numberOfRows = 2
+    : this.numberOfRows = rows;
     columns <= 1
-    ? this.columns = 2
-    : this.columns = columns;
+    ? this.numberOfColumns = 2
+    : this.numberOfColumns = columns;
 
     this.elements = [];
 
     for (
       let ir = 0;
-      ir < this.rows;
+      ir < this.numberOfRows;
       ir++
     ) {
       this.elements[ir] = [];
 
       for (
         let ic = 0;
-        ic < this.columns;
+        ic < this.numberOfColumns;
         ic++
       ) {
         ir === ic
@@ -89,18 +92,7 @@ export class Matrix {
     }
   }
 
-  public getRows(): number {
-    return this.rows;
-  }
-
-  public getColumns(): number {
-    return this.columns;
-  }
-
-  public isSquare(): boolean {
-    return this.rows === this.columns;
-  }
-
+  // initialization methods
   public setFromMatrix( matrix: Matrix ): Matrix {
     this.setFromElements(
       matrix.getElements()
@@ -111,17 +103,17 @@ export class Matrix {
 
   public setFromElements( elements: number[][] ) {
     this.elements = [];
-    this.rows = this.elements.length;
-    this.columns = this.elements[ 0 ].length;
+    this.numberOfRows = this.elements.length;
+    this.numberOfColumns = this.elements[ 0 ].length;
 
     for (
       let ir = 0;
-      ir < this.rows;
+      ir < this.numberOfRows;
       ir++
     ) {
       for (
         let ic = 0;
-        ic < this.columns;
+        ic < this.numberOfColumns;
         ic++
       ) {
         this.elements[ ir ][ ic ] = elements[ ir ][ ic ]
@@ -131,6 +123,7 @@ export class Matrix {
     return this;
   }
 
+  // modification methods
   public setElement(
     row: number,
     column: number,
@@ -141,40 +134,15 @@ export class Matrix {
     return this;
   }
 
-  public getElements(): number[][] {
-    const elements: number[][] = [];
-    for (
-      let ir = 0;
-      ir < this.rows;
-      ir++
-    ) {
-      for (
-        let ic = 0;
-        ic < this.columns;
-        ic++
-      ) {
-        elements[ ir ][ ic ] = this.elements[ ir ][ ic ];
-      }
-    }
-    return elements;
-  }
-
-  public getElement(
-    row: number,
-    column: number
-  ) {
-    return this.elements[ row ][ column ];
-  }
-
   public addScalar( scalar: number ): Matrix {
     for (
       let ir = 0;
-      ir < this.rows;
+      ir < this.numberOfRows;
       ir ++
     ) {
       for (
         let ic = 0;
-        ic < this.columns;
+        ic < this.numberOfColumns;
         ic++
       ) {
         this.elements[ ir ][ ic ] = this.elements[ ir ][ ic ] + scalar;
@@ -192,12 +160,12 @@ export class Matrix {
 
   public addMatrix( matrix: Matrix ): Matrix {
     const mElements: number[][] = matrix.getElements();
-    const mRows: number = matrix.getRows();
-    const mColumns: number = matrix.getColumns();
+    const mRows: number = matrix.getNumberOfRows();
+    const mColumns: number = matrix.getNumberOfColumns();
 
     if (
-      this.rows !== mRows
-      || this.columns !== mColumns
+      this.numberOfRows !== mRows
+      || this.numberOfColumns !== mColumns
     ) {
       return this;
     }
@@ -233,12 +201,12 @@ export class Matrix {
   public multiplyScalar( scalar: number ) {
     for (
       let ir = 0;
-      ir < this.rows;
+      ir < this.numberOfRows;
       ir ++
     ) {
       for (
         let ic = 0;
-        ic < this.columns;
+        ic < this.numberOfColumns;
         ic++
       ) {
         this.elements[ ir ][ ic ] = this.elements[ ir ][ ic ] * scalar;
@@ -264,20 +232,58 @@ export class Matrix {
     return this;
   }
 
+  // products
+  public getNumberOfRows(): number {
+    return this.numberOfRows;
+  }
+
+  public getNumberOfColumns(): number {
+    return this.numberOfColumns;
+  }
+
+  public isSquare(): boolean {
+    return this.numberOfRows === this.numberOfColumns;
+  }
+
+  public getElements(): number[][] {
+    const elements: number[][] = [];
+    for (
+      let ir = 0;
+      ir < this.numberOfRows;
+      ir++
+    ) {
+      for (
+        let ic = 0;
+        ic < this.numberOfColumns;
+        ic++
+      ) {
+        elements[ ir ][ ic ] = this.elements[ ir ][ ic ];
+      }
+    }
+    return elements;
+  }
+
+  public getElement(
+    row: number,
+    column: number
+  ) {
+    return this.elements[ row ][ column ];
+  }
+
   public getTranspose(): Matrix {
     const transpose: Matrix = new Matrix(
-      this.columns,
-      this.rows
+      this.numberOfColumns,
+      this.numberOfRows
     );
 
     for (
       let itr = 0;
-      itr < this.columns;
+      itr < this.numberOfColumns;
       itr ++
     ) {
       for (
         let itc = 0;
-        itc < this.rows;
+        itc < this.numberOfRows;
         itc++
       ) {
         transpose.setElement(
@@ -294,13 +300,13 @@ export class Matrix {
     if ( !this.isSquare() ) {
       return undefined;
     }
-    if ( this.rows <= 1 ) {
+    if ( this.numberOfRows <= 1 ) {
       return undefined;
     }
 
     const cofactors: Matrix = new Matrix(
-      this.rows,
-      this.columns
+      this.numberOfRows,
+      this.numberOfColumns
     );
 
     let determinant: number;
@@ -308,7 +314,7 @@ export class Matrix {
 
     for (
       let imc = 0;
-      imc < cofactors.getColumns();
+      imc < cofactors.getNumberOfColumns();
       imc++
     ) {
       cofactors.setElement(
@@ -327,12 +333,12 @@ export class Matrix {
 
     for (
       let imr = 1;
-      imr < this.rows;
+      imr < this.numberOfRows;
       imr++
     ) {
       for (
         let imc = 0;
-        imc < this.columns;
+        imc < this.numberOfColumns;
         imc++
       ) {
         cofactors.setElement(
@@ -353,8 +359,8 @@ export class Matrix {
 
   public clone() {
     const clone: Matrix = new Matrix(
-      this.rows,
-      this.columns
+      this.numberOfRows,
+      this.numberOfColumns
     ).setFromMatrix( this );
 
     return clone;
@@ -362,8 +368,8 @@ export class Matrix {
 
   public equals( matrix: Matrix ) {
     if (
-      this.getRows() !== matrix.getRows()
-      || this.getColumns() !== matrix.getColumns()
+      this.getNumberOfRows() !== matrix.getNumberOfRows()
+      || this.getNumberOfColumns() !== matrix.getNumberOfColumns()
     ) {
       return false;
     }
@@ -372,12 +378,12 @@ export class Matrix {
 
     for (
       let ir = 0;
-      ir < this.rows;
+      ir < this.numberOfRows;
       ir++
     ) {
       for (
         let ic = 0;
-        ic < this.columns;
+        ic < this.numberOfColumns;
         ic++
       ) {
         if ( this.elements[ ir ][ ic ] !== mElements[ ir ][ ic ] ) {
@@ -391,16 +397,16 @@ export class Matrix {
 
   public getDeterminant(): number {
     if (
-      this.rows !== this.columns
-      || this.rows <= 1
-      || this.columns <= 1
+      this.numberOfRows !== this.numberOfColumns
+      || this.numberOfRows <= 1
+      || this.numberOfColumns <= 1
     ) {
       return undefined;
     }
 
     let determinant: number;
 
-    if ( this.rows === 2 ) {
+    if ( this.numberOfRows === 2 ) {
       determinant
         = this.elements[ 0 ][ 0 ] * this.elements[ 1 ][ 1 ]
         - this.elements[ 0 ][ 1 ] * this.elements[ 1 ][ 0 ];
@@ -412,7 +418,7 @@ export class Matrix {
 
     for (
       let ic = 0;
-      ic < this.columns;
+      ic < this.numberOfColumns;
       ic++
     ) {
       determinant = determinant
@@ -426,10 +432,10 @@ export class Matrix {
     row: number,
     column: number
   ): number {
-    if ( this.rows <= 2 || this.columns <= 2 ) {
+    if ( this.numberOfRows <= 2 || this.numberOfColumns <= 2 ) {
       return undefined;
     }
-    if ( row >= this.rows || column >= this.columns ) {
+    if ( row >= this.numberOfRows || column >= this.numberOfColumns ) {
       // error
       return undefined;
     }
@@ -449,17 +455,17 @@ export class Matrix {
     row: number,
     column: number
   ): Matrix {
-    if ( row >= this.rows || column >= this.columns ) {
+    if ( row >= this.numberOfRows || column >= this.numberOfColumns ) {
       // error
       return undefined;
     }
 
     const minor: Matrix = new Matrix(
-      this.rows - 1,
-      this.columns - 1
+      this.numberOfRows - 1,
+      this.numberOfColumns - 1
     );
-    const mRows: number = minor.getRows();
-    const mColumns: number = minor.getColumns();
+    const mRows: number = minor.getNumberOfRows();
+    const mColumns: number = minor.getNumberOfColumns();
 
     for (
       let imr = 0;

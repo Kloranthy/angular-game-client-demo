@@ -30,9 +30,14 @@ export class Matrix4
 
   // or was it translation?
   public setPosition( vector3: Vector3) {
-    this.elements[ 0 ][ 3 ] = vector3.x;
-    this.elements[ 1 ][ 3 ] = vector3.y;
-    this.elements[ 2 ][ 3 ] = vector3.z;
+
+    for (
+      let i = 0;
+      i < 3;
+      i++
+    ) {
+      this.elements[ i ][ 3 ] = vector3.getComponent( i );
+    }
   }
 
 }

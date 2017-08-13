@@ -1,102 +1,86 @@
 import { Vector3 } from './vector3';
+import { Vector } from './vector';
 
-export class Vector4 {
-  x: number;
-  y: number;
-  z: number;
-  w: number;
+export class Vector4
+  extends Vector {
 
-  constructor() {
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
-    this.w = 1;
+  public constructor() {
+    super( 4 );
+
+    this.setW( 1 );
   }
 
   // initialization
-  setFromValues(
+  public setFromValues(
     x: number,
     y: number,
     z: number,
     w: number
   ): Vector4 {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.w = w;
+    this
+      .setX( x )
+      .setY( y )
+      .setZ( z )
+      .setW( w );
+
     return this;
   }
 
-  setFromVector4( vector: Vector4 ): Vector4 {
-    this.setFromValues(
-      vector.x,
-      vector.y,
-      vector.z,
-      vector.w
-    );
-    return this;
-  }
+  public setFromVector3( vector: Vector3 ): Vector4 {
+    const vComponents: number[] = vector.getComponents();
 
-  setFromVector3( vector: Vector3 ): Vector4 {
-    this.setFromValues(
-      vector.x,
-      vector.y,
-      vector.z,
-      1
-    );
+    for (
+      let i = 0;
+      i < 3;
+      i++
+    ) {
+      this.components[ i ] = vComponents[ i ];
+    }
+
+    this.setW( 1 );
+
     return this;
   }
 
   // modification
-  addVector( vector: Vector4 ): Vector4 {
-    this.x = this.x + vector.x;
-    this.y = this.y + vector.y;
-    this.z = this.z + vector.z;
-    this.w = this.w + vector.w;
+  public setX( x: number ): Vector4 {
+    this.setComponent( 0, x );
+
     return this;
   }
 
-  subtractVector( vector: Vector4 ): Vector4 {
-    this.x = this.x - vector.x;
-    this.y = this.y - vector.y;
-    this.z = this.z - vector.z;
-    this.w = this.w - vector.w;
+  public setY( y: number ): Vector4 {
+    this.setComponent( 1, y );
+
     return this;
   }
 
-  addValue( value: number ): Vector4 {
-    this.x = this.x + value;
-    this.y = this.y + value;
-    this.z = this.z + value;
-    this.w = this.w + value;
+  public setZ( z: number ): Vector4 {
+    this.setComponent( 2, z );
+
     return this;
   }
 
-  scale( scalar: number ): Vector4 {
-    this.x = this.x * scalar;
-    this.y = this.y * scalar;
-    this.z = this.z * scalar;
-    this.w = this.w * scalar;
-    return this;
-  }
+  public setW( w: number ): Vector4 {
+    this.setComponent( 3, w );
 
-  normalize() {
+    return this;
   }
 
   // products
-  getMagnitude(): number {
-    let magnitude: number;
-    magnitude = Math.sqrt( this.getMagnitudeSquared() );
-    return magnitude;
+  public getX(): number {
+    return this.components[ 0 ];
   }
 
-  getMagnitudeSquared(): number {
-    let magnitude2: number;
-    magnitude2 = this.x * this.x
-      + this.y * this.y
-      + this.z * this.z
-      + this.w * this.w
-    ;
-    return magnitude2;
+  public getY(): number {
+    return this.components[ 1 ];
+  }
+
+  public getZ(): number {
+    return this.components[ 2 ];
+  }
+
+  public getW(): number {
+    return this.components[ 3 ];
   }
 }
