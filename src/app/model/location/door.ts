@@ -1,12 +1,22 @@
+import { Transform } from './transform';
+import { Portal } from './portal';
 
 export class Door {
   private doorId: string;
   private isOpen: boolean;
   private image: string;
-  // todo position stuff
+  private transform: Transform;
+  private portal: Portal;
+  private connectedDoor: Door;
 
-  constructor() {}
+  public constructor() {}
 
-  open() {}
-  close() {}
+  // initialization
+
+  // modification
+
+  public open() {}
+  public close() {}
 }
+
+  // products

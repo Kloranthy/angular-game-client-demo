@@ -357,6 +357,39 @@ export class Matrix {
     return inverse;
   }
 
+  public getDeterminant(): number {
+    if (
+      this.numberOfRows !== this.numberOfColumns
+      || this.numberOfRows <= 1
+      || this.numberOfColumns <= 1
+    ) {
+      return undefined;
+    }
+
+    let determinant: number;
+
+    if ( this.numberOfRows === 2 ) {
+      determinant
+        = this.elements[ 0 ][ 0 ] * this.elements[ 1 ][ 1 ]
+        - this.elements[ 0 ][ 1 ] * this.elements[ 1 ][ 0 ];
+
+      return determinant;
+    }
+
+    determinant = 0;
+
+    for (
+      let ic = 0;
+      ic < this.numberOfColumns;
+      ic++
+    ) {
+      determinant = determinant
+        + this.getCofactorFor( 0, ic );
+    }
+
+    return determinant;
+  }
+
   public clone() {
     const clone: Matrix = new Matrix(
       this.numberOfRows,
@@ -393,39 +426,6 @@ export class Matrix {
     }
 
     return true;
-  }
-
-  public getDeterminant(): number {
-    if (
-      this.numberOfRows !== this.numberOfColumns
-      || this.numberOfRows <= 1
-      || this.numberOfColumns <= 1
-    ) {
-      return undefined;
-    }
-
-    let determinant: number;
-
-    if ( this.numberOfRows === 2 ) {
-      determinant
-        = this.elements[ 0 ][ 0 ] * this.elements[ 1 ][ 1 ]
-        - this.elements[ 0 ][ 1 ] * this.elements[ 1 ][ 0 ];
-
-      return determinant;
-    }
-
-    determinant = 0;
-
-    for (
-      let ic = 0;
-      ic < this.numberOfColumns;
-      ic++
-    ) {
-      determinant = determinant
-        + this.getCofactorFor( 0, ic );
-    }
-
-    return determinant;
   }
 
   protected getCofactorFor(

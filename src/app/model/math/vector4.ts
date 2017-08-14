@@ -83,4 +83,11 @@ export class Vector4
   public getW(): number {
     return this.components[ 3 ];
   }
+
+  public clone(): Vector4 {
+    const clone: Vector4 = new Vector4()
+      .setFromVector( this );
+
+    return clone;
+  }
 }

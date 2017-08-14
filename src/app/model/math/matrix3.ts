@@ -6,4 +6,11 @@ export class Matrix3
   public constructor() {
     super( 3, 3 );
   }
+
+  public clone(): Matrix3 {
+    const clone: Matrix3 = new Matrix3()
+      .setFromMatrix( this );
+
+    return clone;
+  }
 }

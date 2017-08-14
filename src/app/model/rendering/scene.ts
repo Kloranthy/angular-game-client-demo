@@ -1,4 +1,4 @@
-import { Tile } from './tile';
+import { Tile } from '../location/tile';
 
 export class Scene {
 

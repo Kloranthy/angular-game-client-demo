@@ -54,7 +54,6 @@ export class Vector3
   }
 
   public getCrossProduct( vector: Vector3 ): Vector3 {
-
     const vComponents: number[] = vector.getComponents();
     const crossProduct: Vector3 = new Vector3()
       .setX(
@@ -71,5 +70,12 @@ export class Vector3
       );
 
     return crossProduct;
+  }
+
+  public clone(): Vector3 {
+    const clone: Vector3 = new Vector3()
+      .setFromVector( this );
+
+    return clone;
   }
 }

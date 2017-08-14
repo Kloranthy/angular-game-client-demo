@@ -5,25 +5,27 @@ import { CameraInternals } from '../rendering/camera-internals';
 
 export class Frustum {
   // points
-  nearTopLeftPoint: Vector3;
-  nearTopRightPoint: Vector3;
-  nearBottomLeftPoint: Vector3;
-  nearBottomRightPoint: Vector3;
-  farTopLeftPoint: Vector3;
-  farTopRightPoint: Vector3;
-  farBottomLeftPoint: Vector3;
-  farBottomRightPoint: Vector3;
+  private nearTopLeftPoint: Vector3;
+  private nearTopRightPoint: Vector3;
+  private nearBottomLeftPoint: Vector3;
+  private nearBottomRightPoint: Vector3;
+  private farTopLeftPoint: Vector3;
+  private farTopRightPoint: Vector3;
+  private farBottomLeftPoint: Vector3;
+  private farBottomRightPoint: Vector3;
   // planes
-  leftPlane: Plane;
-  rightPlane: Plane;
-  topPlane: Plane;
-  bottomPlane: Plane;
-  nearPlane: Plane;
-  farPlane: Plane;
+  private leftPlane: Plane;
+  private rightPlane: Plane;
+  private topPlane: Plane;
+  private bottomPlane: Plane;
+  private nearPlane: Plane;
+  private farPlane: Plane;
+  // additional clipping plane for portal frustums?
 
   constructor() {
   }
 
+  // initialization
   setFromValues(
     nearTopLeftPoint: Vector3,
     nearTopRightPoint: Vector3,
@@ -95,14 +97,8 @@ export class Frustum {
     return this;
   }
 
-  clone(): Frustum {
-    let clone: Frustum;
-    clone = new Frustum()
-      .setFromFrustum(this);
-    return clone;
-  }
-
-  getPoints(): Vector3[] {
+  // products
+  public getPoints(): Vector3[] {
     let points: Vector3[];
     points = [
       this.nearTopLeftPoint,
@@ -117,7 +113,7 @@ export class Frustum {
     return points;
   }
 
-  getPlanes(): Plane[] {
+  public getPlanes(): Plane[] {
     let planes: Plane[];
     planes = [
       this.leftPlane,
@@ -130,7 +126,7 @@ export class Frustum {
     return planes;
   }
 
-  containsPoint(point: Vector3): boolean {
+  public containsPoint(point: Vector3): boolean {
     const planes: Plane[] = this.getPlanes();
 
     for (
@@ -145,6 +141,13 @@ export class Frustum {
     }
 
     return true;
+  }
+
+  public clone(): Frustum {
+    let clone: Frustum;
+    clone = new Frustum()
+      .setFromFrustum(this);
+    return clone;
   }
 
   private calculatePoints(
@@ -163,7 +166,7 @@ export class Frustum {
       .addVector(
         cameraForwardDirection
           .clone()
-          .scale(
+          .multiplyScalar(
             nearDistance
           )
       );
@@ -174,7 +177,7 @@ export class Frustum {
       .addVector(
         cameraForwardDirection
           .clone()
-          .scale(
+          .multiplyScalar(
             farDistance - nearDistance
           )
       );
@@ -184,74 +187,74 @@ export class Frustum {
     this.nearTopLeftPoint = nearCenter.clone()
       .subtractVector(
         cameraRightDirection.clone()
-          .scale( nearHalfWidth )
+          .multiplyScalar( nearHalfWidth )
       )
       .addVector(
         cameraUpDirection.clone()
-          .scale( nearHalfHeight )
+          .multiplyScalar( nearHalfHeight )
       );
     this.nearTopRightPoint = nearCenter.clone()
       .addVector(
         cameraRightDirection.clone()
-          .scale( nearHalfWidth )
+          .multiplyScalar( nearHalfWidth )
       )
       .addVector(
         cameraUpDirection.clone()
-          .scale( nearHalfHeight )
+          .multiplyScalar( nearHalfHeight )
       );
     this.nearBottomLeftPoint = nearCenter.clone()
       .subtractVector(
         cameraRightDirection.clone()
-          .scale( nearHalfWidth )
+          .multiplyScalar( nearHalfWidth )
       )
       .subtractVector(
         cameraUpDirection.clone()
-          .scale( nearHalfHeight )
+          .multiplyScalar( nearHalfHeight )
       );
     this.nearBottomRightPoint = nearCenter.clone()
       .addVector(
         cameraRightDirection.clone()
-          .scale( nearHalfWidth )
+          .multiplyScalar( nearHalfWidth )
       )
       .subtractVector(
         cameraUpDirection.clone()
-          .scale( nearHalfHeight )
+          .multiplyScalar( nearHalfHeight )
       );
     this.farTopLeftPoint = farCenter.clone()
       .subtractVector(
         cameraRightDirection.clone()
-          .scale( farHalfWidth )
+          .multiplyScalar( farHalfWidth )
       )
       .addVector(
         cameraUpDirection.clone()
-          .scale( farHalfHeight )
+          .multiplyScalar( farHalfHeight )
       );
     this.farTopRightPoint = farCenter.clone()
       .addVector(
         cameraRightDirection.clone()
-          .scale( farHalfWidth )
+          .multiplyScalar( farHalfWidth )
       )
       .addVector(
         cameraUpDirection.clone()
-          .scale( farHalfHeight )
+          .multiplyScalar( farHalfHeight )
       );
     this.farBottomLeftPoint = farCenter.clone()
       .subtractVector(
         cameraRightDirection.clone()
-          .scale( farHalfWidth )
+          .multiplyScalar( farHalfWidth )
       )
       .subtractVector(
         cameraUpDirection.clone()
-          .scale( farHalfHeight )
+          .multiplyScalar( farHalfHeight )
       );
     this.farBottomRightPoint = farCenter.clone()
       .addVector(
         cameraRightDirection.clone()
-          .scale( farHalfWidth )
+          .multiplyScalar( farHalfWidth )
       )
       .subtractVector(
         cameraUpDirection.clone()
-          .scale( farHalfHeight )
+          .multiplyScalar( farHalfHeight )
       );
     return this;
   }
@@ -293,6 +296,7 @@ export class Frustum {
         this.farTopLeftPoint,
         this.farBottomLeftPoint
       );
+
     return this;
   }
 

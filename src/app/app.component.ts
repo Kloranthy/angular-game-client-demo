@@ -6,7 +6,7 @@ import { InputProcessorService } from './control/service/input-processor.service
 
 import { CanvasComponent } from './render/component/canvas/canvas.component';
 
-import { Camera } from './render/model/camera';
+import { Camera } from './model/rendering/camera';
 
 @Component({
   selector: 'app-root',
