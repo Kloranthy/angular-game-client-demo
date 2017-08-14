@@ -99,8 +99,8 @@ export class RenderService {
     calculation of view frustum?
 
     rendering of camera view
-      calculate visible tiles?
-      (for now, in non prototype version server will calculate visible frustum and only send visible tiles to client)
+      setFromCamera visible tiles?
+      (for now, in non prototype version server will setFromCamera visible frustum and only send visible tiles to client)
       sort visible tiles by distance from camera
       draw tiles onto buffer canvas
       sort visible entities by distance from camera

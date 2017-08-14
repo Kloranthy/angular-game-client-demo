@@ -1,121 +1,101 @@
+import { CameraInternals } from './camera-internals';
 import { Frustum } from '../math/frustum';
 import { Vector3 } from '../math/vector3';
-import { CameraInternals } from './camera-internals';
+import { Transform } from '../location/transform';
 
 export class Camera {
-
   private cameraInternals: CameraInternals;
-  // todo: convert these to position objects
-  private cameraPosition: Vector3; // the position of the camera in world coordinates
-  private targetPosition: Vector3; // the position the target is focused on
+  private transform: Transform;
 
-  // todo: use a coordinate system object to hold the camera up, forward, and right directions
-  /**
-    represents positive movement along the horizontal axis of the camera coordinate system in relation to the world coordinate system
-  */
-  xDirection: Vector3;
-  /**
-    represents positive movement along the vertical axis of the camera coordinate system in relation to the world coordinate system
-  */
-  yDirection: Vector3;
-  /**
-    represents positive movement along the forward axis of the camera coordinate system in relation to the world coordinate system
-  */
-  zDirection: Vector3;
-
-  viewFrustum: Frustum; // frustum representing the view of the camera
-
-  constructor() {}
+  constructor() {
+    this.cameraInternals = new CameraInternals();
+  }
 
   // initialization
-  setCameraInternals( cameraInternals: CameraInternals ): Camera {
+  public setFromCamera( camera: Camera ): Camera {
+    this
+      .setCameraInternals(
+        camera.getCameraInternals()
+      )
+      .setTransform(
+        camera.getTransform()
+      );
+
+    return this;
+  }
+
+  public setCameraInternals(
+    cameraInternals: CameraInternals
+  ): Camera {
     this.cameraInternals = cameraInternals;
+
+    return this;
+  }
+
+  public setTransform( transform: Transform ): Camera {
+    this.transform = transform;
+
     return this;
   }
 
   setCameraPosition( cameraPosition: Vector3 ): Camera {
-    this.cameraPosition = cameraPosition;
+    this.transform.setPositionFromVector( cameraPosition );
+
     return this;
   }
 
   setTargetPosition( targetPosition: Vector3 ): Camera {
-    this.targetPosition = targetPosition;
+    this.calculateCameraDirections( targetPosition );
+
     return this;
   }
 
-  getCameraPosition(): Vector3 {
-    return this.cameraPosition;
+  // modification
+
+  // products
+  public getCameraInternals(): CameraInternals {
+    const cameraInternals: CameraInternals = this.cameraInternals.clone();
+
+    return cameraInternals;
   }
 
-  getTargetPosition(): Vector3 {
-    return this.targetPosition;
+  public getTransform(): Transform {
+    const transform: Transform = this.transform.clone();
+
+    return transform;
   }
 
-  extractScene() {}
+  public getCameraPosition(): Vector3 {
+    const cameraPosition: Vector3 = this.transform.getPositionVector();
 
-  getCameraForwardDirection(): Vector3 {
-    return this.zDirection;
+    return cameraPosition;
   }
 
-  getCameraRightDirection(): Vector3 {
-    return this.xDirection;
-  }
-
-  getCameraUpDirection(): Vector3 {
-    return this.yDirection;
-  }
-
-  getViewFrustum(): Frustum {
-    return this.viewFrustum;
+  public extractScene() {
+    const viewFrustum: Frustum = new Frustum()
+      .setFromCamera( this );
   }
   /**
     calculates the directions of the camera coordinate system in relation to the world system
   */
-  private calculateCameraDirections(): Camera {
-    this.calculateCameraForwardDirection();
-    this.calculateCameraRightDirection();
-    this.calculateCameraUpDirection();
-    return this;
-  }
+  private calculateCameraDirections( targetPosition: Vector3 ): Camera {
+    const cameraPosition: Vector3 = this.getCameraPosition();
 
-  /**
-    calculates the forward direction(z axis) of the camera coordinate system in relation to the world system
-  */
-  private calculateCameraForwardDirection(): Camera {
-    this.zDirection = this.targetPosition.clone()
-      .subtractVector(this.cameraPosition)
+    const zDirection: Vector3 = targetPosition.clone();
+    zDirection
+      .subtractVector( cameraPosition )
       .normalize();
-    return this;
-  }
 
-  /**
-    calculates the right direction(x axis) of the camera coordinate system in relation to the world system
-  */
-  private calculateCameraRightDirection(): Camera {
-    this.xDirection = this.zDirection.cross(
-      this.cameraPosition.getUpDirection()
-    )
-      .normalize();
-    return this;
-  }
+    const xDirection: Vector3 = zDirection
+      .getCrossProduct(
+        cameraPosition
+      );
+    xDirection.normalize();
 
-  /**
-    calculates the upward direction(y axis) of the camera coordinate system in relation to the world system
-  */
-  private calculateCameraUpDirection(): Camera {
-    this.yDirection = this.xDirection.cross(this.zDirection);
-    return this;
-  }
-
-  private calculateViewFrustum(): Camera {
-    this.calculateCameraDirections();
-    this.viewFrustum = new Frustum().calculate(
-      this.cameraInternals,
-      this.cameraPosition,
-      this.zDirection,
-      this.xDirection,
-      this.yDirection
+    const yDirection: Vector3 = xDirection.getCrossProduct(
+      zDirection
     );
+
     return this;
   }
 }

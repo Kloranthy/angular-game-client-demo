@@ -15,8 +15,17 @@ export class Door {
 
   // modification
 
-  public open() {}
-  public close() {}
+  public open() {
+    if ( !this.isOpen && this.portal ) {
+      this.isOpen = true;
+    }
+  }
+
+  public close() {
+    if ( this.isOpen ) {
+      this.isOpen = false;
+    }
+  }
 }
 
   // products

@@ -21,7 +21,6 @@ export class Vector3
     return this;
   }
 
-  // modification
   public setX( x: number ): Vector3 {
     this.setComponent( 0, x );
 
@@ -39,6 +38,9 @@ export class Vector3
 
     return this;
   }
+
+  // modification
+
 
   // products
   public getX(): number {

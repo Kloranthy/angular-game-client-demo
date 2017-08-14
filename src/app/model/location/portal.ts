@@ -1,5 +1,12 @@
 import { Transform } from './transform';
 
+/**
+ * note: for finding the view frustum portal
+ * get the point of the portal closest to the
+ * camera. this will be a corner point on the
+ * near plane of the portal view frustum.
+ * 
+ */
 export class Portal {
   private entranceTransform: Transform;
   private exitTransform: Transform;
@@ -11,23 +18,23 @@ export class Portal {
   public constructor() {}
 
   // initialization
-  setEntranceTransform( transform: Transform ) {
+  public setEntranceTransform( transform: Transform ) {
     this.entranceTransform = transform;
   }
 
-  setExitTransform( transform: Transform ) {
+  public setExitTransform( transform: Transform ) {
     this.exitTransform = transform;
   }
 
-  setHeight( value: number ) {
+  public setHeight( value: number ) {
     this.height = value;
   }
 
-  setWidth( value: number ) {
+  public setWidth( value: number ) {
     this.width = value;
   }
 
-  setTraversable( isTraversable: boolean ) {
+  public setTraversable( isTraversable: boolean ) {
     this.isTraversable = isTraversable;
   }
 

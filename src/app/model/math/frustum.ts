@@ -2,6 +2,9 @@
 import { Plane } from './plane';
 import { Vector3 } from './vector3';
 import { CameraInternals } from '../rendering/camera-internals';
+import { Transform } from '../location/transform';
+import { Matrix3 } from './matrix3';
+import { Camera } from '../rendering/camera';
 
 export class Frustum {
   // points
@@ -22,11 +25,11 @@ export class Frustum {
   private farPlane: Plane;
   // additional clipping plane for portal frustums?
 
-  constructor() {
+  public constructor() {
   }
 
   // initialization
-  setFromValues(
+  public setFromValues(
     nearTopLeftPoint: Vector3,
     nearTopRightPoint: Vector3,
     nearBottomLeftPoint: Vector3,
@@ -56,74 +59,199 @@ export class Frustum {
     this.bottomPlane = bottomPlane;
     this.nearPlane = nearPlane;
     this.farPlane = farPlane;
+
     return this;
   }
 
-  setFromFrustum(frustum: Frustum): Frustum {
+  public setFromFrustum( frustum: Frustum ): Frustum {
     this.setFromValues(
-      frustum.nearTopLeftPoint,
-      frustum.nearTopRightPoint,
-      frustum.nearBottomLeftPoint,
-      frustum.nearBottomRightPoint,
-      frustum.farTopLeftPoint,
-      frustum.farTopRightPoint,
-      frustum.farBottomLeftPoint,
-      frustum.farBottomRightPoint,
-      frustum.leftPlane,
-      frustum.rightPlane,
-      frustum.topPlane,
-      frustum.bottomPlane,
-      frustum.nearPlane,
-      frustum.farPlane
+      frustum.getNearTopLeftPoint(),
+      frustum.getNearTopRightPoint(),
+      frustum.getNearBottomLeftPoint(),
+      frustum.getNearBottomRightPoint(),
+      frustum.getFarTopLeftPoint(),
+      frustum.getFarTopRightPoint(),
+      frustum.getFarBottomLeftPoint(),
+      frustum.getFarBottomRightPoint(),
+      frustum.getLeftPlane(),
+      frustum.getRightPlane(),
+      frustum.getTopPlane(),
+      frustum.getBottomPlane(),
+      frustum.getNearPlane(),
+      frustum.getFarPlane()
     );
     return this;
   }
 
-  calculate(
-    cameraInternals: CameraInternals,
-    cameraPosition: Vector3,
-    cameraForwardDirection: Vector3,
-    cameraRightDirection: Vector3,
-    cameraUpDirection: Vector3
+  public setFromCamera(
+    camera: Camera
   ): Frustum {
-    this.calculatePoints(
-      cameraInternals,
+    const cameraInternals: CameraInternals = camera.getCameraInternals();
+    const cameraTransform: Transform = camera.getTransform();
+
+    const horizontalFieldOfView: number = cameraInternals.getHorizontalFieldOfView();
+    const aspectRatio: number = cameraInternals.getAspectRatio();
+    const nearDistance: number = cameraInternals.getNearDistance();
+    const farDistance: number = cameraInternals.getFarDistance();
+
+    const cameraPosition: Vector3 = cameraTransform.getPositionVector();
+    const cameraRotationMatrix: Matrix3 = cameraTransform.getRotationMatrix();
+    const crmElements: number[][] = cameraRotationMatrix.getElements();
+    const cameraForwardDirection: Vector3 = new Vector3()
+      .setX( crmElements[ 0 ][ 2 ] )
+      .setY( crmElements[ 1 ][ 2 ] )
+      .setZ( crmElements[ 2 ][ 2 ] );
+    const cameraRightDirection: Vector3 = new Vector3()
+      .setX( crmElements[ 0 ][ 0 ] )
+      .setY( crmElements[ 1 ][ 0 ] )
+      .setZ( crmElements[ 2 ][ 0 ] );
+    const cameraUpDirection: Vector3 = new Vector3()
+      .setX( crmElements[ 0 ][ 1 ] )
+      .setY( crmElements[ 1 ][ 1 ] )
+      .setZ( crmElements[ 2 ][ 1 ] );
+
+    this.calculateViewFrustum(
+      horizontalFieldOfView,
+      aspectRatio,
+      nearDistance,
+      farDistance,
       cameraPosition,
       cameraForwardDirection,
       cameraRightDirection,
       cameraUpDirection
     );
+
+    return this;
+  }
+
+  public calculateViewFrustum(
+    horizontalFieldOfView: number,
+    aspectRatio: number,
+    nearDistance: number,
+    farDistance: number,
+    position: Vector3,
+    forwardDirection: Vector3,
+    rightDirection: Vector3,
+    upDirection: Vector3
+  ): Frustum {
+    this.calculatePoints(
+      horizontalFieldOfView,
+      aspectRatio,
+      nearDistance,
+      farDistance,
+      position,
+      forwardDirection,
+      rightDirection,
+      upDirection
+    );
     this.calculatePlanes();
+
     return this;
   }
 
   // products
   public getPoints(): Vector3[] {
-    let points: Vector3[];
-    points = [
-      this.nearTopLeftPoint,
-      this.nearTopRightPoint,
-      this.nearBottomLeftPoint,
-      this.nearBottomRightPoint,
-      this.farTopLeftPoint,
-      this.farTopRightPoint,
-      this.farBottomLeftPoint,
-      this.farBottomRightPoint
+    const points: Vector3[] = [
+      this.nearTopLeftPoint.clone(),
+      this.nearTopRightPoint.clone(),
+      this.nearBottomLeftPoint.clone(),
+      this.nearBottomRightPoint.clone(),
+      this.farTopLeftPoint.clone(),
+      this.farTopRightPoint.clone(),
+      this.farBottomLeftPoint.clone(),
+      this.farBottomRightPoint.clone()
     ];
+
     return points;
   }
 
+  public getNearTopLeftPoint(): Vector3 {
+    const nearTopLeftPoint: Vector3 = this.nearTopLeftPoint.clone();
+
+    return nearTopLeftPoint;
+  }
+
+  public getNearTopRightPoint(): Vector3 {
+    const nearTopRightPoint: Vector3 = this.nearTopRightPoint.clone();
+
+    return nearTopRightPoint;
+  }
+
+  public getNearBottomLeftPoint(): Vector3 {
+    const nearBottomLeftPoint: Vector3 = this.nearBottomLeftPoint.clone();
+
+    return nearBottomLeftPoint;
+  }
+
+  public getNearBottomRightPoint(): Vector3 {
+    const nearBottomRightPoint: Vector3 = this.nearBottomRightPoint.clone();
+
+    return nearBottomRightPoint;
+  }
+
+  public getFarTopLeftPoint(): Vector3 {
+    const farTopLeftPoint: Vector3 = this.farTopLeftPoint.clone();
+
+    return farTopLeftPoint;
+  }
+
+  public getFarTopRightPoint(): Vector3 {
+    const farTopRightPoint: Vector3 = this.farTopRightPoint.clone();
+
+    return farTopRightPoint;
+  }
+
+  public getFarBottomLeftPoint(): Vector3 {
+    const farBottomLeftPoint: Vector3 = this.farBottomLeftPoint.clone();
+
+    return farBottomLeftPoint;
+  }
+
+  public getFarBottomRightPoint(): Vector3 {
+    const farBottomRightPoint: Vector3 = this.farBottomRightPoint.clone();
+
+    return farBottomRightPoint;
+  }
+
   public getPlanes(): Plane[] {
-    let planes: Plane[];
-    planes = [
-      this.leftPlane,
-      this.rightPlane,
-      this.topPlane,
-      this.bottomPlane,
-      this.nearPlane,
-      this.farPlane
+    const planes: Plane[] = [
+      this.leftPlane.clone(),
+      this.rightPlane.clone(),
+      this.topPlane.clone(),
+      this.bottomPlane.clone(),
+      this.nearPlane.clone(),
+      this.farPlane.clone()
     ];
+
     return planes;
+  }
+
+  public getLeftPlane(): Plane {
+    const leftPlane: Plane = this.leftPlane.clone();
+
+    return leftPlane;
+  }
+
+  public getRightPlane(): Plane {
+    const rightPlane: Plane = this.rightPlane.clone();
+
+    return rightPlane;
+  }
+
+  public getTopPlane(): Plane {
+    return this.topPlane;
+  }
+
+  public getBottomPlane(): Plane {
+    return this.bottomPlane;
+  }
+
+  public getNearPlane(): Plane {
+    return this.nearPlane;
+  }
+
+  public getFarPlane(): Plane {
+    return this.farPlane;
   }
 
   public containsPoint(point: Vector3): boolean {
@@ -144,116 +272,136 @@ export class Frustum {
   }
 
   public clone(): Frustum {
-    let clone: Frustum;
-    clone = new Frustum()
+    const clone: Frustum = new Frustum()
       .setFromFrustum(this);
+
     return clone;
   }
 
   private calculatePoints(
-    cameraInternals: CameraInternals,
-    cameraPosition: Vector3,
-    cameraForwardDirection: Vector3,
-    cameraRightDirection: Vector3,
-    cameraUpDirection: Vector3
+    horizontalFieldOfView: number,
+    aspectRatio: number,
+    nearDistance: number,
+    farDistance: number,
+    position: Vector3,
+    forwardDirection: Vector3,
+    rightDirection: Vector3,
+    upDirection: Vector3
   ): Frustum {
-    const horizontalFieldOfView: number = cameraInternals.getHorizontalFieldOfView();
-    const aspectRatio: number = cameraInternals.getAspectRatio();
-    const nearDistance: number = cameraInternals.getNearDistance();
-    const farDistance: number = cameraInternals.getFarDistance();
-    const nearCenter: Vector3 = cameraPosition
-      .clone()
-      .addVector(
-        cameraForwardDirection
-          .clone()
-          .multiplyScalar(
-            nearDistance
-          )
-      );
-    const nearHalfWidth: number = Math.tan( horizontalFieldOfView / 2 ) * nearDistance;
+    const nearHalfWidth: number = Math.tan( horizontalFieldOfView / 2 )
+      * nearDistance;
     const nearHalfHeight: number = nearHalfWidth / aspectRatio;
-    const farCenter: Vector3 = nearCenter
-      .clone()
-      .addVector(
-        cameraForwardDirection
-          .clone()
-          .multiplyScalar(
-            farDistance - nearDistance
-          )
-      );
-    const farHalfWidth: number = Math.tan( horizontalFieldOfView / 2 ) * farDistance;
+    const farHalfWidth: number = Math.tan( horizontalFieldOfView / 2 )
+      * farDistance;
     const farHalfHeight: number = farHalfWidth / aspectRatio;
 
-    this.nearTopLeftPoint = nearCenter.clone()
+    const nearCenter: Vector3 = position.clone();
+    nearCenter.addVector(
+      forwardDirection
+        .clone()
+        .multiplyScalar( nearDistance )
+    );
+
+    const farCenter: Vector3 = position.clone();
+    farCenter.addVector(
+      forwardDirection
+        .clone()
+        .multiplyScalar( farDistance )
+    );
+
+    this.nearTopLeftPoint = nearCenter.clone();
+    this.nearTopLeftPoint
       .subtractVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( nearHalfWidth )
       )
       .addVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( nearHalfHeight )
       );
-    this.nearTopRightPoint = nearCenter.clone()
+    this.nearTopRightPoint = nearCenter.clone();
+    this.nearTopRightPoint
       .addVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( nearHalfWidth )
       )
       .addVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( nearHalfHeight )
       );
-    this.nearBottomLeftPoint = nearCenter.clone()
+    this.nearBottomLeftPoint = nearCenter.clone();
+    this.nearBottomLeftPoint
       .subtractVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( nearHalfWidth )
       )
       .subtractVector(
-        cameraUpDirection.clone()
+        upDirection.clone()
           .multiplyScalar( nearHalfHeight )
       );
-    this.nearBottomRightPoint = nearCenter.clone()
+    this.nearBottomRightPoint = nearCenter.clone();
+    this.nearBottomRightPoint
       .addVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( nearHalfWidth )
       )
       .subtractVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( nearHalfHeight )
       );
-    this.farTopLeftPoint = farCenter.clone()
+    this.farTopLeftPoint = farCenter.clone();
+    this.farTopLeftPoint
       .subtractVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( farHalfWidth )
       )
       .addVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( farHalfHeight )
       );
-    this.farTopRightPoint = farCenter.clone()
+    this.farTopRightPoint = farCenter.clone();
+    this.farTopRightPoint
       .addVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( farHalfWidth )
       )
       .addVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( farHalfHeight )
       );
-    this.farBottomLeftPoint = farCenter.clone()
+    this.farBottomLeftPoint = farCenter.clone();
+    this.farBottomLeftPoint
       .subtractVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( farHalfWidth )
       )
       .subtractVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( farHalfHeight )
       );
-    this.farBottomRightPoint = farCenter.clone()
+    this.farBottomRightPoint = farCenter.clone();
+    this.farBottomRightPoint
       .addVector(
-        cameraRightDirection.clone()
+        rightDirection
+          .clone()
           .multiplyScalar( farHalfWidth )
       )
       .subtractVector(
-        cameraUpDirection.clone()
+        upDirection
+          .clone()
           .multiplyScalar( farHalfHeight )
       );
     return this;

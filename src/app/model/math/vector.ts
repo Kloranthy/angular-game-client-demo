@@ -86,7 +86,7 @@ export class Vector {
     return this;
   }
 
-  public addVector( vector: Vector ) {
+  public addVector( vector: Vector ): Vector {
     if ( vector.getNumberOfComponents() !== this.numberOfComponents ) {
       return undefined;
     }
@@ -104,14 +104,15 @@ export class Vector {
     return this;
   }
 
-  public subtractVector( vector: Vector ) {
+  public subtractVector( vector: Vector ): Vector {
     if ( vector.getNumberOfComponents() !== this.numberOfComponents ) {
       return undefined;
     }
 
     const negativeVector: Vector = vector
-      .clone()
-      .multiplyScalar( -1 );
+      .clone();
+
+    vector.multiplyScalar( -1 );
 
     this.addVector( negativeVector );
 

@@ -7,44 +7,83 @@ export class CameraInternals {
   private nearDistance: number;
   private farDistance: number;
 
-  constructor() {
+  public constructor() {
     this.horizontalFieldOfView = 60;
     this.aspectRatio = 1;
     this.nearDistance = 6;
     this.farDistance = 60;
   }
 
-  getHorizontalFieldOfView(): number {
+  // initialization
+  public setFromCameraInternals( cameraInternals: CameraInternals ) {
+    this
+      .setHorizontalFieldOfView(
+        cameraInternals.getHorizontalFieldOfView()
+      )
+      .setAspectRatio(
+        cameraInternals.getAspectRatio()
+      )
+      .setNearDistance(
+        cameraInternals.getNearDistance()
+      )
+      .setFarDistance(
+        cameraInternals.getFarDistance()
+      );
+
+    return this;
+  }
+
+  public setHorizontalFieldOfView(
+    horizontalFieldOfView: number
+  ): CameraInternals {
+    this.horizontalFieldOfView = horizontalFieldOfView;
+
+    return this;
+  }
+
+  public setAspectRatio( aspectRatio: number ): CameraInternals {
+    this.aspectRatio = aspectRatio;
+
+    return this;
+  }
+
+  public setNearDistance( nearDistance: number ): CameraInternals {
+    this.nearDistance = nearDistance;
+
+    return this;
+  }
+
+  public setFarDistance( farDistance: number ): CameraInternals {
+    this.farDistance = farDistance;
+
+    return this;
+  }
+
+  // modification
+
+  // products
+  public getHorizontalFieldOfView(): number {
     return this.horizontalFieldOfView;
   }
 
-  setHorizontalFieldOfView( value: number ) {
-    this.horizontalFieldOfView = value;
-  }
-
-  getAspectRatio(): number {
+  public getAspectRatio(): number {
     return this.aspectRatio;
   }
 
-  setAspectRatio( value: number ) {
-    this.aspectRatio = value;
-  }
-
-  getNearDistance(): number {
+  public getNearDistance(): number {
     return this.nearDistance;
   }
 
-  setNearDistance( value: number ) {
-    this.nearDistance = value;
-  }
-
-  getFarDistance(): number {
+  public getFarDistance(): number {
     return this.farDistance;
   }
 
-  setFarDistance( value: number ) {
-    this.farDistance = value;
-  }
-
   // todo method for lerping between internals
+
+  public clone(): CameraInternals {
+    const clone: CameraInternals = new CameraInternals()
+      .setFromCameraInternals( this );
+
+    return clone;
+  }
 }
