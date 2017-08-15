@@ -28,34 +28,37 @@ export class Matrix {
 
     const aElements: number[][] = matrixA.getElements();
     const bElements: number[][] = matrixB.getElements();
-    const cElements: number[][] = matrixC.getElements();
 
     for (
       let icr = 0;
       icr < mARows;
       icr++
     ) {
-      cElements[ icr ] = [];
 
       for (
         let icc = 0;
         icc < mBColumns;
         icc++
       ) {
-        cElements[ icr ][ icc ] = 0;
+        let cElementSum: number;
+
+        cElementSum = 0;
 
         for (
           let iac = 0;
           iac < mAColumns;
           iac++
         ) {
-          cElements[ icr ][ icc ] = cElements[ icr ][ icc ]
+          cElementSum = cElementSum
             + aElements[ icr ][ iac ] * bElements[ iac ][ icc ];
         }
+
+        matrixC.setElement(
+          icr, icc,
+          cElementSum
+        );
       }
     }
-
-    matrixC.setFromElements( cElements );
 
     return matrixC;
   }

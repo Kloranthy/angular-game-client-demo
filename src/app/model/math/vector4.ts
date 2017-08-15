@@ -1,5 +1,6 @@
 import { Vector3 } from './vector3';
 import { Vector } from './vector';
+import { Matrix4 } from './matrix4';
 
 export class Vector4
   extends Vector {
@@ -63,6 +64,12 @@ export class Vector4
 
   public setW( w: number ): Vector4 {
     this.setComponent( 3, w );
+
+    return this;
+  }
+
+  public applyMatrix4( matrix: Matrix4 ): Vector4 {
+    this.applyMatrix( matrix );
 
     return this;
   }

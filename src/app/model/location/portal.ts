@@ -5,7 +5,7 @@ import { Transform } from './transform';
  * get the point of the portal closest to the
  * camera. this will be a corner point on the
  * near plane of the portal view frustum.
- * 
+ * made a diagram.
  */
 export class Portal {
   private entranceTransform: Transform;

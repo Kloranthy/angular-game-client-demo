@@ -1,4 +1,7 @@
 import { Vector } from './vector';
+import { Matrix3 } from './matrix3';
+import { Vector4 } from './vector4';
+import { Matrix4 } from './matrix4';
 
 export class Vector3
   extends Vector {
@@ -40,7 +43,28 @@ export class Vector3
   }
 
   // modification
+  public applyMatrix3( matrix: Matrix3 ): Vector3 {
+    this.applyMatrix( matrix );
 
+    return this;
+  }
+
+  public applyMatrix4( matrix: Matrix4 ): Vector3 {
+    const vector: Vector4 = new Vector4()
+      .setFromVector3( this );
+
+    vector.applyMatrix4( matrix );
+    vector.multiplyScalar(
+      1 / vector.getW()
+    );
+
+    this
+      .setX( vector.getX() )
+      .setY( vector.getY() )
+      .setZ( vector.getZ() );
+
+    return this;
+  }
 
   // products
   public getX(): number {

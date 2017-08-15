@@ -1,4 +1,7 @@
 import { Vector } from './vector';
+import { Matrix2 } from './matrix2';
+import { Matrix3 } from './matrix3';
+import { Vector3 } from './vector3';
 
 export class Vector2
   extends Vector {
@@ -32,6 +35,31 @@ export class Vector2
   }
 
   // modification
+  public applyMatrix2( matrix: Matrix2 ): Vector2 {
+    this.applyMatrix( matrix );
+
+    return this;
+  }
+
+  public applyMatrix3( matrix: Matrix3 ): Vector2 {
+    const vector: Vector3 = new Vector3(); // todo vector3 setFrom vector2
+    vector
+      .setX( this.getX() )
+      .setY( this.getY() )
+      .setZ( 1 );
+
+    vector.applyMatrix3( matrix );
+
+    vector.multiplyScalar(
+      1 / vector.getZ()
+    );
+
+    this
+      .setX( vector.getX() )
+      .setY( vector.getY() );
+
+    return this;
+  }
 
   // products
   public getX(): number {

@@ -1,9 +1,9 @@
-import { CoordinateSystem } from '../math/coordinate-system';
 import { Tile } from './tile';
+import { Transform } from './transform';
 
 export class Cell {
   private cellId: string;
-  private coordinateSystem: CoordinateSystem;
+  private transform: Transform;
   // todo connection points and connections to other cells/coordinate systems
   private connectedCells;
   private tiles: Tile[];
@@ -15,18 +15,10 @@ export class Cell {
     this.cellId = cellId;
   }
 
-  public setCoordinateSystem( coordinateSystem: CoordinateSystem ) {
-    this.coordinateSystem = coordinateSystem;
-  }
-
   // modification
 
   // products
   public getCellId(): string {
     return this.cellId;
-  }
-
-  public getCoordinateSystem(): CoordinateSystem {
-    return this.coordinateSystem;
   }
 }

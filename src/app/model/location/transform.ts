@@ -4,19 +4,26 @@ import { Matrix3 } from '../math/matrix3';
 import { Matrix4 } from '../math/matrix4';
 
 export class Transform {
-  private coordinateSystem: CoordinateSystem;
+  // id? reference to what it is attached to?
+  private parent: Transform;
+  private children: Transform[];
   private transformationMatrix: Matrix4;
+
+  public static lerpBetween( start: Transform, end: Transform, alpha: number ) {
+    // const lerped = end.clone();
+    // const lerpedMatrix = lerped.getTransformationMatrix();
+    // lerpedMatrix
+    // .subtractMatrix( start )
+    // .multiplyScalar( alpha )
+    // .addMatrix( start );
+    // return lerped;
+  }
 
   public constructor() {
     this.transformationMatrix = new Matrix4();
   }
 
   // initialization
-  public setCoordinateSystem( coordinateSystem: CoordinateSystem ): Transform {
-    this.coordinateSystem = coordinateSystem;
-    return this;
-  }
-
   public setRotationFromMatrix( rotation: Matrix3 ): Transform {
     const mElements: number[][] = rotation.getElements();
 
@@ -58,19 +65,39 @@ export class Transform {
     return this;
   }
 
+  // should only be used for init, use modification method for changing
+  public setParent( parent: Transform ) {
+    if ( this.parent ) {
+      this.parent.removeChild( this );
+    }
+    this.parent = parent;
+    this.parent.addChild( this );
+  }
+
   // set scale?
 
   // modification
-  transferToCoordinateSystem( coordinateSystem: CoordinateSystem ) {
-    // todo: transform matrix
-    this.coordinateSystem = coordinateSystem;
+  public changeParent( parent: Transform ) {
+    // apply transform to new parent from current parent
+    this.parent = parent;
   }
 
-  // lerp between
+  public addChild( child: Transform ) {
+    // todo
+    this.children.push( child );
+  }
+
+  public removeChild( child: Transform ) {
+    // todo
+  }
 
   // apply transformation
 
   // products
+  public getParent(): Transform {
+    return this.parent;
+  }
+
   public getRotationMatrix(): Matrix3 {
     const rotation: Matrix3 = new Matrix3();
     const elements: number[][] = this.transformationMatrix.getElements();
@@ -123,7 +150,6 @@ export class Transform {
 
   clone(): Transform {
     const clone: Transform = new Transform();
-    clone.setCoordinateSystem( this.coordinateSystem );
     // todo set matrix/vector too
     return clone;
   }

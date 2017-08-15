@@ -24,6 +24,7 @@ export class Frustum {
   private nearPlane: Plane;
   private farPlane: Plane;
   // additional clipping plane for portal frustums?
+  private portalPlane: Plane;
 
   public constructor() {
   }
@@ -149,6 +150,9 @@ export class Frustum {
     return this;
   }
 
+  // modification
+  // apply transform
+
   // products
   public getPoints(): Vector3[] {
     const points: Vector3[] = [
@@ -223,6 +227,11 @@ export class Frustum {
       this.farPlane.clone()
     ];
 
+
+    if ( this.portalPlane ) {
+      planes.push( this.portalPlane.clone() );
+    }
+
     return planes;
   }
 
@@ -239,19 +248,27 @@ export class Frustum {
   }
 
   public getTopPlane(): Plane {
-    return this.topPlane;
+    const topPlane: Plane = this.topPlane.clone();
+
+    return topPlane;
   }
 
   public getBottomPlane(): Plane {
-    return this.bottomPlane;
+    const bottomPlane: Plane = this.bottomPlane.clone();
+
+    return bottomPlane;
   }
 
   public getNearPlane(): Plane {
-    return this.nearPlane;
+    const nearPlane: Plane = this.nearPlane.clone();
+
+    return nearPlane;
   }
 
   public getFarPlane(): Plane {
-    return this.farPlane;
+    const farPlane: Plane = this.farPlane.clone();
+
+    return farPlane;
   }
 
   public containsPoint(point: Vector3): boolean {

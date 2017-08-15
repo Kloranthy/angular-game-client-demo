@@ -1,4 +1,5 @@
 
+import { Matrix } from './matrix';
 export class Vector {
   protected numberOfComponents: number;
   protected components: number[];
@@ -115,6 +116,37 @@ export class Vector {
     vector.multiplyScalar( -1 );
 
     this.addVector( negativeVector );
+
+    return this;
+  }
+
+  public applyMatrix( matrix: Matrix ): Vector {
+    if ( matrix.getNumberOfColumns() !== this.numberOfComponents ) {
+      return undefined;
+    }
+    const mElements = matrix.getElements();
+    const vComponents = this.getComponents();
+
+    for (
+      let ic = 0;
+      ic < matrix.getNumberOfColumns();
+      ic++
+    ) {
+      let componentSum: number;
+
+      componentSum = 0;
+
+      for (
+        let ir = 0;
+        ir < matrix.getNumberOfRows();
+        ir++
+      ) {
+        componentSum = componentSum
+          + mElements[ ir ][ ic ] * vComponents[ ic ]
+      }
+
+      this.setComponent( ic, componentSum );
+    }
 
     return this;
   }
